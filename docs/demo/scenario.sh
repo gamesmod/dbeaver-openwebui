@@ -46,6 +46,9 @@ xdotool key Return; sleep 2
 xdotool mousemove 1272 138 click 1; sleep 4
 windows new-profile
 shot 22-new-profile
+xdotool mousemove 751 369 click 1; sleep 2
+shot 23-engines-list
+xdotool key Escape; sleep 1
 xdotool key Escape; sleep 2
 xdotool key Escape; sleep 2
 
@@ -53,3 +56,6 @@ xdotool key Escape; sleep 2
 crop 11-chat-answer chat 1440x870+0+0
 crop 11-chat-answer chat-panel 325x790+1115+85
 crop 12-models models 325x200+1115+670
+cp "$RAW/20-settings-win.png" "$OUT/settings.png"; echo "copy settings"
+crop 21-test-connection test-connection 1142x826+150+50
+crop 23-engines-list new-profile 620x420+400+260
