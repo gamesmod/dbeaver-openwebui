@@ -7,6 +7,8 @@
 и GitHub Copilot. Через него работают штатные функции ассистента: AI-чат, генерация SQL, команда `@ai`
 в редакторе и вызов функций для чтения метаданных БД.
 
+![AI-чат DBeaver через Open WebUI](docs/screenshots/chat.png)
+
 ## Изменения
 
 - **2.0.1** — релиз публикуется сборкой сразу с архивами update site (в 2.0.0 их нет).
@@ -87,14 +89,39 @@ Installation Details → Installed Software → Open WebUI for DBeaver → Unins
 
 1. В Open WebUI включите API-ключи: *Admin Panel → Settings → General → Enable API Keys*.
    Затем создайте ключ: *Settings → Account → API Keys*.
-2. В DBeaver: *Окно → Параметры → AI → Движки* → добавить профиль → движок **Open WebUI (OpenAI-compatible)**.
+2. В DBeaver откройте настройки AI: шестерёнка в панели *AI Chat* (или *Окно → Параметры → AI*) →
+   *Model configurations* → **+** (*Create new profile*) → движок **Open WebUI (OpenAI-compatible)**.
+
+   ![Выбор движка при создании профиля](docs/screenshots/new-profile.png)
+
 3. Заполните:
    - **Базовый URL** — `http://host:3000/api`. Если указать только `http://host:3000`, `/api` добавится сам.
      Для vLLM/LiteLLM/LM Studio — `http://host:port/v1`.
    - **API-ключ** — `sk-…` из Open WebUI (или JWT). Оставьте пустым, если аутентификация отключена.
    - **Модель** — кнопка обновления загрузит список с сервера.
    - **Размер контекста** — подставляется из модели. Для Ollama проверьте значение: по умолчанию там часто 2048–8192.
-4. «Проверить подключение» → OK.
+4. *Test Connection* → OK, затем *Apply and Close*.
+
+   ![Настройки профиля Open WebUI](docs/screenshots/settings.png)
+
+   ![Проверка подключения](docs/screenshots/test-connection.png)
+
+## Использование
+
+Откройте панель *AI Chat* (*Window → AI Chat*), внизу выберите профиль **Open WebUI** и модель.
+Список моделей загружается с сервера, *Refresh models* обновляет его.
+
+<p>
+  <img src="docs/screenshots/chat-panel.png" alt="Ответ модели в AI-чате" width="325">
+  <img src="docs/screenshots/models.png" alt="Выбор модели Open WebUI" width="325">
+</p>
+
+Ответы приходят потоком. SQL из ответа можно выполнить, вставить в редактор или скопировать кнопками
+под блоком кода. Если в чате выбрано подключение к БД, модель сама запрашивает список схем, таблиц и DDL
+через функции DBeaver (нужна модель с поддержкой tool calling).
+
+Скриншоты сняты автоматически workflow *docs* на DBeaver CE 26.2.1 с mock-сервером Open WebUI
+(*Actions → docs → Run workflow*, флажок *publish* обновляет картинки в `docs/screenshots`).
 
 Для SQL лучше подходят модели с нативным tool calling (Qwen2.5/3, Llama 3.1+, GPT-4o и т.п.). Если модель
 не умеет tools, снимите «Разрешить вызов функций»: ассистент будет работать по контексту, без чтения метаданных.
@@ -175,6 +202,7 @@ features/dbeaver.openwebui.ai.feature/   feature для update site
 releng/site/category.xml                 категория update site
 scripts/build-offline.sh                 сборка плагина и update site
 scripts/run-tests.sh                     тесты
+scripts/docs-screenshots.sh, docs/demo/  скриншоты для README (workflow docs)
 tests/                                   заглушки API DBeaver, mock Open WebUI, тесты
 ```
 
@@ -187,8 +215,9 @@ tests/                                   заглушки API DBeaver, mock Open
 
 ## Ограничения
 
-- Работа внутри запущенного DBeaver и с живым Open WebUI пока не проверялась вручную. CI проверяет
-  компиляцию против DBeaver и установку через p2, но не запуск интерфейса.
+- С настоящим сервером Open WebUI плагин пока не проверялся: в CI вместо него mock-сервер.
+  Запуск в DBeaver 26.2.1, настройки, загрузка моделей, проверка подключения и потоковый ответ в чате
+  проверены в workflow *docs*.
 - Update site не подписан: при установке DBeaver попросит подтвердить установку неподписанного содержимого.
 
 ## Лицензия

@@ -58,4 +58,4 @@ crop 11-chat-answer chat-panel 325x790+1115+85
 crop 12-models models 325x200+1115+670
 cp "$RAW/20-settings-win.png" "$OUT/settings.png"; echo "copy settings"
 crop 21-test-connection test-connection 1142x826+150+50
-crop 23-engines-list new-profile 620x420+400+260
+crop 23-engines-list new-profile 372x272+540+284
