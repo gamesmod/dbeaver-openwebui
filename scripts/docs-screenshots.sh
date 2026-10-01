@@ -72,6 +72,8 @@ windows() {
     echo "$w $(xdotool getwindowgeometry "$w" 2>/dev/null | tr '\n' ' ') :: $(xdotool getwindowname "$w")"; done
 }
 
+# Песочница WebKitGTK на раннерах Ubuntu 24.04 мешает мосту JS → Java (BrowserFunction) в чате
+export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 WEBKIT_DISABLE_COMPOSITING_MODE=1
 "$DBEAVER_HOME/dbeaver" -nosplash -data "$WS" -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=true \
   > "$RAW/dbeaver-stdout.log" 2>&1 &
 DBPID=$!
