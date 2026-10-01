@@ -1,0 +1,1 @@
+package org.jkiss.utils; public class HttpConstants { public static final int CODE_OK=200, CODE_MOVED_PERMANENTLY=301, CODE_FOUND=302, CODE_SEE_OTHER=303, CODE_TEMPORARY_REDIRECT=307, CODE_PERMANENT_REDIRECT=308; }

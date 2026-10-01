@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+    <!-- New AI engine: appears in Window > Preferences > AI > Engines next to OpenAI and GitHub Copilot -->
+    <extension point="com.dbeaver.ai.engine">
+        <completionEngine
+            id="openwebui"
+            label="Open WebUI (OpenAI-compatible)"
+            icon="icons/openwebui.svg"
+            class="dbeaver.openwebui.model.OpenWebUIEngine"
+            properties="dbeaver.openwebui.model.OpenWebUIProperties"
+            promoted="true"
+            supportsFunctions="true"
+            providesMetadata="false"/>
+    </extension>
+
+    <!-- Settings panel for the engine (lookup is by exact engine class name) -->
+    <extension point="org.jkiss.dbeaver.ui.propertyConfigurator">
+        <propertyConfigurator
+            class="dbeaver.openwebui.model.OpenWebUIEngine"
+            uiClass="dbeaver.openwebui.ui.OpenWebUIConfigurator"/>
+    </extension>
+
+</plugin>

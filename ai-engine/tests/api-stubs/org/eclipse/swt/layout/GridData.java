@@ -1,0 +1,1 @@
+package org.eclipse.swt.layout; public class GridData { public static final int FILL_HORIZONTAL=768, VERTICAL_ALIGN_BEGINNING=2; public int horizontalSpan; public GridData(){} public GridData(int s){} }

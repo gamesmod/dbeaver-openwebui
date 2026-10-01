@@ -1,0 +1,1 @@
+package org.jkiss.dbeaver.model.exec; public class DBCException extends org.jkiss.dbeaver.DBException { public DBCException(String m){super(m);} public DBCException(String m, Throwable t){super(m,t);} }

@@ -1,0 +1,1 @@
+package org.eclipse.swt.widgets; public class Control { public void setLayoutData(Object o){} public Object getLayoutData(){return null;} public void setToolTipText(String s){} public boolean isDisposed(){return false;} }
