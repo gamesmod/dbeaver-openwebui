@@ -15,3 +15,7 @@ xdotool type --delay 80 "AI"; sleep 2
 xdotool key Down; sleep 3
 windows prefs
 shot 04-prefs-ai
+xdotool mousemove 205 152 click 1; sleep 4
+shot 05-ai-page
+xdotool mousemove 520 160 click 1; sleep 2
+shot 06-engine-combo
