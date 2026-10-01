@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<site>
-   <feature id="io.dbtools.openwebui.feature" version="0.0.0">
-      <category name="openwebui"/>
-   </feature>
-   <category-def name="openwebui" label="Open WebUI integration">
-      <description>Плагины интеграции DBeaver с Open WebUI</description>
-   </category-def>
-</site>

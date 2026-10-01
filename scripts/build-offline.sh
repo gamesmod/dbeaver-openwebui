@@ -7,19 +7,21 @@
 #   (Windows: Git Bash / WSL, DBEAVER_HOME="/c/Program Files/DBeaver")
 #
 # Результат в dist/:
-#   io.dbtools.openwebui_<версия>.jar          — сам плагин
-#   io.dbtools.openwebui-site-<версия>.zip     — архив update site для Help → Install New Software → Add → Archive
+#   dbeaver.openwebui.ai_<версия>.jar           — сам плагин
+#   dbeaver-openwebui-ai-site-<версия>.zip      — архив update site для Help → Install New Software → Add → Archive
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 : "${DBEAVER_HOME:?Укажите DBEAVER_HOME — каталог установки DBeaver (в нём лежит папка plugins)}"
 PLUGINS="$DBEAVER_HOME/plugins"
 [ -d "$PLUGINS" ] || { echo "Не найден $PLUGINS" >&2; exit 1; }
+ls "$PLUGINS"/org.jkiss.dbeaver.model.ai_* >/dev/null 2>&1 || {
+  echo "В $PLUGINS нет org.jkiss.dbeaver.model.ai — нужен DBeaver CE 26.2 или новее" >&2; exit 1; }
 
-BASE_VERSION="$(sed -n 's/^Bundle-Version: \([0-9.]*\)\.qualifier.*/\1/p' "$ROOT/bundles/io.dbtools.openwebui/META-INF/MANIFEST.MF" | tr -d '\r')"
+BASE_VERSION="$(sed -n 's/^Bundle-Version: \([0-9.]*\)\.qualifier.*/\1/p' "$ROOT/bundles/dbeaver.openwebui.ai/META-INF/MANIFEST.MF" | tr -d '\r')"
 VERSION="${BASE_VERSION}.v$(date -u +%Y%m%d%H%M)"
-BUNDLE="$ROOT/bundles/io.dbtools.openwebui"
-FEATURE="$ROOT/features/io.dbtools.openwebui.feature"
+BUNDLE="$ROOT/bundles/dbeaver.openwebui.ai"
+FEATURE="$ROOT/features/dbeaver.openwebui.ai.feature"
 WORK="$ROOT/target/offline"
 DIST="$ROOT/dist"
 
@@ -30,6 +32,7 @@ JAR="${JAR:-$(dirname "$JAVAC")/jar}"
 JAVA_RT="$DBEAVER_HOME/jre/bin/java"
 [ -x "$JAVA_RT" ] || JAVA_RT="$(dirname "$JAVAC")/java"
 
+rm -f "$DIST"/dbeaver.openwebui.ai_*.jar "$DIST"/dbeaver-openwebui-ai-site-*.zip 2>/dev/null || true
 rm -rf "$WORK" && mkdir -p "$WORK/classes" "$WORK/pkg" "$WORK/src/plugins" "$WORK/src/features" "$WORK/site" "$DIST"
 
 echo "==> Classpath из $PLUGINS"
@@ -44,8 +47,11 @@ echo "==> Компиляция"
 echo "==> Упаковка плагина $VERSION"
 cp -r "$WORK/classes/." "$WORK/pkg/"
 cp -r "$BUNDLE/plugin.xml" "$BUNDLE/icons" "$WORK/pkg/"
+# NLS-ресурсы (сообщения ru/en)
+(cd "$BUNDLE/src" && find . -name '*.properties' | while read -r f; do
+  mkdir -p "$WORK/pkg/$(dirname "$f")"; cp "$f" "$WORK/pkg/$f"; done)
 sed "s/$BASE_VERSION.qualifier/$VERSION/" "$BUNDLE/META-INF/MANIFEST.MF" > "$WORK/MANIFEST.MF"
-PLUGIN_JAR="$WORK/src/plugins/io.dbtools.openwebui_$VERSION.jar"
+PLUGIN_JAR="$WORK/src/plugins/dbeaver.openwebui.ai_$VERSION.jar"
 (cd "$WORK/pkg" && "$JAR" cfm "$PLUGIN_JAR" "$WORK/MANIFEST.MF" .)
 cp "$PLUGIN_JAR" "$DIST/"
 
@@ -53,7 +59,7 @@ echo "==> Упаковка feature"
 mkdir -p "$WORK/feature"
 sed -e "s/$BASE_VERSION.qualifier/$VERSION/" -e "s/version=\"0.0.0\"/version=\"$VERSION\"/" \
   "$FEATURE/feature.xml" > "$WORK/feature/feature.xml"
-(cd "$WORK/feature" && "$JAR" cf "$WORK/src/features/io.dbtools.openwebui.feature_$VERSION.jar" feature.xml)
+(cd "$WORK/feature" && "$JAR" cf "$WORK/src/features/dbeaver.openwebui.ai.feature_$VERSION.jar" feature.xml)
 
 echo "==> Публикация p2-репозитория"
 LAUNCHER="$(ls "$PLUGINS"/org.eclipse.equinox.launcher_*.jar | head -1)"
@@ -68,17 +74,17 @@ SITE_URI="file:$WORK/site"
 "$JAVA_RT" -jar "$LAUNCHER" -nosplash -configuration "$P2CFG" -install "$DBEAVER_HOME" \
   -application org.eclipse.equinox.p2.publisher.FeaturesAndBundlesPublisher \
   -metadataRepository "$SITE_URI" -artifactRepository "$SITE_URI" \
-  -metadataRepositoryName "Open WebUI for DBeaver" -artifactRepositoryName "Open WebUI for DBeaver" \
+  -metadataRepositoryName "Open WebUI engine for DBeaver" -artifactRepositoryName "Open WebUI engine for DBeaver" \
   -source "$WORK/src" -publishArtifacts
 "$JAVA_RT" -jar "$LAUNCHER" -nosplash -configuration "$P2CFG" -install "$DBEAVER_HOME" \
   -application org.eclipse.equinox.p2.publisher.CategoryPublisher \
   -metadataRepository "$SITE_URI" \
-  -categoryDefinition "file:$ROOT/releng/io.dbtools.openwebui.site/category.xml" -categoryQualifier openwebui
+  -categoryDefinition "file:$ROOT/releng/site/category.xml" -categoryQualifier openwebui
 
-SITE_ZIP="$DIST/io.dbtools.openwebui-site-$VERSION.zip"
+SITE_ZIP="$DIST/dbeaver-openwebui-ai-site-$VERSION.zip"
 (cd "$WORK/site" && "$JAR" cfM "$SITE_ZIP" .)
 
 echo
 echo "Готово:"
-echo "  плагин:      $DIST/io.dbtools.openwebui_$VERSION.jar"
+echo "  плагин:      $DIST/dbeaver.openwebui.ai_$VERSION.jar"
 echo "  update site: $SITE_ZIP"

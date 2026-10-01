@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <feature id="dbeaver.openwebui.ai.feature" version="0.0.0">
+      <category name="openwebui"/>
+   </feature>
+   <category-def name="openwebui" label="Open WebUI integration">
+      <description>Движок Open WebUI для AI-ассистента DBeaver</description>
+   </category-def>
+</site>

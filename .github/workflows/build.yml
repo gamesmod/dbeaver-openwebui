@@ -6,10 +6,10 @@ on:
     tags: ['v*']
   pull_request:
   workflow_dispatch:
-
-env:
-  # Версия DBeaver CE, против которой собирается и тестируется плагин.
-  DBEAVER_VERSION: 25.3.0
+    inputs:
+      dbeaver_version:
+        description: 'Версия DBeaver CE (например 26.2.1). Пусто — последний релиз.'
+        required: false
 
 permissions:
   contents: write
@@ -25,23 +25,46 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      # Плагин использует AI API DBeaver 26.2+, поэтому по умолчанию собираем против последнего релиза CE.
+      - name: Resolve DBeaver version
+        id: dbv
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ inputs.dbeaver_version }}
+        run: |
+          V="${INPUT_VERSION:-$(gh release view --repo dbeaver/dbeaver --json tagName -q .tagName)}"
+          echo "DBeaver CE $V"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+
       - name: Cache DBeaver
         id: dbeaver-cache
         uses: actions/cache@v4
         with:
           path: ${{ runner.temp }}/dbeaver
-          key: dbeaver-ce-${{ env.DBEAVER_VERSION }}-linux
+          key: dbeaver-ce-${{ steps.dbv.outputs.version }}-linux
 
-      - name: Download DBeaver CE ${{ env.DBEAVER_VERSION }}
+      - name: Download DBeaver CE ${{ steps.dbv.outputs.version }}
         if: steps.dbeaver-cache.outputs.cache-hit != 'true'
+        env:
+          V: ${{ steps.dbv.outputs.version }}
         run: |
           curl -fsSL -o dbeaver.tgz \
-            "https://github.com/dbeaver/dbeaver/releases/download/${DBEAVER_VERSION}/dbeaver-ce-${DBEAVER_VERSION}-linux.gtk.x86_64.tar.gz"
+            "https://github.com/dbeaver/dbeaver/releases/download/${V}/dbeaver-ce-${V}-linux.gtk.x86_64.tar.gz"
           tar xzf dbeaver.tgz -C "$RUNNER_TEMP"
+
+      - name: Check DBeaver AI extension points
+        run: |
+          P="$RUNNER_TEMP/dbeaver/plugins"
+          MODEL_AI=$(ls "$P"/org.jkiss.dbeaver.model.ai_*.jar)
+          UI=$(ls "$P"/org.jkiss.dbeaver.ui_*.jar)
+          unzip -p "$MODEL_AI" plugin.xml | grep -q 'extension-point id="com.dbeaver.ai.engine"'
+          unzip -p "$UI" plugin.xml | grep -q 'extension-point id="org.jkiss.dbeaver.ui.propertyConfigurator"'
+          echo "OK: $(basename "$MODEL_AI"), $(basename "$UI")"
 
       - name: Tests
         run: DBEAVER_HOME="$RUNNER_TEMP/dbeaver" ./scripts/run-tests.sh
 
+      # Компиляция идёт против настоящих jar DBeaver — это проверка совместимости с его API.
       - name: Build plugin and update site
         run: DBEAVER_HOME="$RUNNER_TEMP/dbeaver" ./scripts/build-offline.sh
 
@@ -53,12 +76,19 @@ jobs:
           jre/bin/java -jar plugins/org.eclipse.equinox.launcher_*.jar -nosplash \
             -application org.eclipse.equinox.p2.director \
             -repository "jar:file:${SITE}!/" \
-            -installIU io.dbtools.openwebui.feature.feature.group
-          grep -q io.dbtools.openwebui configuration/org.eclipse.equinox.simpleconfigurator/bundles.info
+            -installIU dbeaver.openwebui.ai.feature.feature.group
+          grep -q '^dbeaver.openwebui.ai,' configuration/org.eclipse.equinox.simpleconfigurator/bundles.info
+
+      - name: Check tag matches bundle version
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          BV=$(sed -n 's/^Bundle-Version: \([0-9.]*\)\.qualifier.*/\1/p' bundles/dbeaver.openwebui.ai/META-INF/MANIFEST.MF | tr -d '\r')
+          [ "$TAG" = "$BV" ] || { echo "Тег v$TAG не совпадает с Bundle-Version $BV" >&2; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:
-          name: dbeaver-openwebui
+          name: dbeaver-openwebui-ai
           path: dist/*
 
       - name: Publish release
@@ -66,4 +96,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*
+          make_latest: true
           generate_release_notes: true
+          body: |
+            Движок Open WebUI для встроенного AI-ассистента DBeaver.
+            Собрано и проверено установкой через p2 на DBeaver CE ${{ steps.dbv.outputs.version }}.
+            Установка: Help → Install New Software… → Add… → Archive… → `dbeaver-openwebui-ai-site-*.zip`.
