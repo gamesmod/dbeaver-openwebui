@@ -33,7 +33,7 @@ echo "dbeaver.openwebui.p2test,1.0.0,plugins/dbeaver.openwebui.p2test_1.0.0.jar,
 echo "==> Установка новой версии: все фичи категории (как при отметке категории в мастере)"
 IUS="dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group"
 set +e
-"$H/jre/bin/java" -jar "$(ls "$H"/plugins/org.eclipse.equinox.launcher_*.jar | head -1)" -nosplash -consoleLog \
+"$( [ -x "$H/jre/bin/java" ] && echo "$H/jre/bin/java" || command -v java )" -jar "$(ls "$H"/plugins/org.eclipse.equinox.launcher_*.jar | head -1)" -nosplash -consoleLog \
   -application dbeaver.openwebui.p2test.app "jar:file:$NEW_SITE!/" "$IUS" 2>&1 | tee "$T/out.txt" | grep -v -E '^\s*$|SLF4J'
 RC=${PIPESTATUS[0]}
 set -e
