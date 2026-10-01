@@ -19,3 +19,6 @@ xdotool mousemove 205 152 click 1; sleep 4
 shot 05-ai-page
 xdotool mousemove 520 160 click 1; sleep 2
 shot 06-engine-combo
+xdotool mousemove 520 224 click 1; sleep 4
+windows engine-selected
+shot 07-openwebui-selected
