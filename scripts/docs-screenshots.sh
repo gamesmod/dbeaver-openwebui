@@ -74,7 +74,7 @@ windows() {
 
 # Песочница WebKitGTK на раннерах Ubuntu 24.04 мешает мосту JS → Java (BrowserFunction) в чате
 export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 WEBKIT_DISABLE_COMPOSITING_MODE=1
-"$DBEAVER_HOME/dbeaver" -nosplash -data "$WS" -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=true \
+"$DBEAVER_HOME/dbeaver" -nosplash -data "$WS" -vmargs -Dorg.eclipse.swt.internal.gtk.cairoGraphics=true -Ddbeaver.openwebui.selftest="$WS/selftest.sql" \
   > "$RAW/dbeaver-stdout.log" 2>&1 &
 DBPID=$!
 

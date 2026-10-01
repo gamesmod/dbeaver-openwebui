@@ -22,32 +22,18 @@ xdotool key ctrl+Return; sleep 12
 shot 11-chat-answer
 windows after-chat
 
-# --- проверка, что клики доходят до веб-страницы чата: кнопка «копировать»
-clip() { xclip -o -selection clipboard -t UTF8_STRING 2>/dev/null | head -c 60; }
-xdotool mousemove 1401 489; sleep 1; xdotool click 1; sleep 2
-echo "clipboard after click: [$(clip)]"
-xdotool mousemove 1395 485; sleep 0.5; xdotool mousemove 1401 489; sleep 0.5
-xdotool mousedown 1; sleep 0.2; xdotool mouseup 1; sleep 2
-echo "clipboard after down/up: [$(clip)]"
-W=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2)
-echo "window under mouse: $W $(xdotool getwindowname "$W" 2>/dev/null)"
-xdotool click --window "$W" 1; sleep 2
-echo "clipboard after window click: [$(clip)]"
-
-# --- кнопка выполнения запроса из ответа
-xdotool mousemove 1337 489; sleep 2
-shot 13-play-hover
-xdotool click 1; sleep 3
-grep -i "open webui" "$WS/.metadata/dbeaver-debug.log" | tail -5
-xdotool click 1; sleep 12
-windows after-play
-shot 14-play-result
+# --- кнопка ▶ без подключения в чате: тестовый хук передаёт SQL ответа в executeInEditor (см. ChatExecuteFix)
+sed -n '/```sql/,/```/p' "$ROOT/docs/demo/answer-sqlite.md" | sed '1d;$d' > "$WS/selftest.sql"
+sleep 25
+windows after-execute
+grep -i "open webui" "$WS/.metadata/dbeaver-debug.log" | tail -6
+shot 14-execute-result
 for i in 1 2; do
   w=$(xdotool search --onlyvisible --name '.' | while read -r x; do n=$(xdotool getwindowname "$x"); case "$n" in "DBeaver"*|"") ;; *) echo "$x";; esac; done | head -1)
   [ -z "$w" ] && break
-  echo "dialog after play: $(xdotool getwindowname "$w")"; shot "15-play-dialog-$i"; xdotool windowactivate --sync "$w"; xdotool key Return; sleep 8
+  echo "dialog after execute: $(xdotool getwindowname "$w")"; shot "15-execute-dialog-$i"; xdotool windowactivate --sync "$w"; xdotool key Return; sleep 10
 done
-shot 16-play-final
+shot 16-execute-final
 
 # --- список моделей с сервера
 xdotool mousemove 1295 853 click 1; sleep 3
@@ -78,6 +64,18 @@ shot 23-engines-list
 xdotool key Escape; sleep 1
 xdotool key Escape; sleep 2
 xdotool key Escape; sleep 2
+
+# --- «Мои промпты» в настройках AI (дерево слева: Prompts → My prompts)
+activate DBeaver
+xdotool mousemove 1412 143 click 1; sleep 5
+wmctrl -r :ACTIVE: -e 0,150,50,1140,800; sleep 2
+xdotool mousemove 206 152 click 1; sleep 2
+xdotool key Right; sleep 1; xdotool key Down; sleep 3
+xdotool mousemove 700 840; sleep 1
+shot 30-prompts-page
+xdotool key Escape; sleep 2
+activate DBeaver
+shot 31-main-with-toolbar
 
 # --- итоговые картинки
 crop 11-chat-answer chat 1440x870+0+0

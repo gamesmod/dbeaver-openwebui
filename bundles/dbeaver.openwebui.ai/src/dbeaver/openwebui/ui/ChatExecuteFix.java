@@ -110,6 +110,7 @@ public class ChatExecuteFix implements IWorkbenchWindowInitializer {
                 @Nullable
                 @Override
                 public Object function(@NotNull Object[] arguments) {
+                    jsCalled = true;
                     if (arguments.length > 0 && arguments[0] != null) {
                         String sql = arguments[0].toString();
                         log.debug("Open WebUI: execute requested from AI chat (" + sql.length() + " chars)");
@@ -127,10 +128,53 @@ public class ChatExecuteFix implements IWorkbenchWindowInitializer {
             };
             browser.setData(INSTALLED_KEY, Boolean.TRUE);
             log.debug("Open WebUI: AI chat execute handler installed");
+            startSelfTest(chat, browser);
         } catch (Throwable e) {
             // Internal structure of the chat changed in a newer DBeaver: keep the standard behaviour
             log.debug("Open WebUI: can't install AI chat execute handler", e);
         }
+    }
+
+    private static volatile boolean jsCalled;
+
+    /**
+     * Test hook for CI (scripts/docs-screenshots.sh), inactive unless -Ddbeaver.openwebui.selftest=&lt;file&gt; is set:
+     * when the file appears, its SQL is passed to the chat's executeInEditor JS function (like the ▶ button);
+     * if the JS bridge does not respond, the same Java logic is called directly.
+     */
+    private static void startSelfTest(@NotNull AIChatControl chat, @NotNull Browser browser) {
+        String file = System.getProperty("dbeaver.openwebui.selftest");
+        if (file == null || file.isBlank()) {
+            return;
+        }
+        java.nio.file.Path path = java.nio.file.Path.of(file);
+        Runnable[] poll = new Runnable[1];
+        poll[0] = () -> {
+            if (browser.isDisposed()) {
+                return;
+            }
+            if (!java.nio.file.Files.exists(path)) {
+                browser.getDisplay().timerExec(1000, poll[0]);
+                return;
+            }
+            try {
+                String sql = java.nio.file.Files.readString(path);
+                java.nio.file.Files.delete(path);
+                jsCalled = false;
+                String literal = "'" + sql.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "\\n").replace("\r", "") + "'";
+                boolean executed = browser.execute(FUNCTION_NAME + "(" + literal + ");");
+                log.debug("Open WebUI selftest: JS call executed=" + executed);
+                browser.getDisplay().timerExec(3000, () -> {
+                    log.debug("Open WebUI selftest: JS bridge called handler=" + jsCalled);
+                    if (!jsCalled) {
+                        execute(chat, sql);
+                    }
+                });
+            } catch (Exception e) {
+                log.error("Open WebUI selftest failed", e);
+            }
+        };
+        browser.getDisplay().timerExec(1000, poll[0]);
     }
 
     @Nullable
