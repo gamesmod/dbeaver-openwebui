@@ -29,3 +29,9 @@ xdotool mousemove 880 224 click 1; sleep 0.5; xdotool key ctrl+a; xdotool type -
 shot 08-filled
 xdotool mousemove 1262 320 click 1; sleep 4
 shot 09-models-refreshed
+xdotool mousemove 1229 320 click 1; sleep 2
+shot 10-models-list
+xdotool key Down; sleep 0.5; xdotool key Return; sleep 2
+xdotool mousemove 408 602 click 1; sleep 6
+windows test-connection
+shot 11-test-connection
