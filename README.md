@@ -11,6 +11,15 @@
 
 ## Изменения
 
+- **2.1.0**
+  - **DBeaver 25.2.4–25.2.5.** Отдельный совместимый бандл. На 25.2 версия 2.0.x падала с
+    «Can't load class OpenWebUIProperties»: AI API в 25.2 другой. p2 сам ставит подходящий вариант.
+  - **Обновление поверх старых версий.** Если при установке отметить категорию *Open WebUI integration*
+    целиком, плагин 1.x (`io.dbtools.openwebui`) и версии 2.0.x обновляются на месте, без ручного удаления.
+  - **Кнопка ▶ под SQL в AI-чате** работает и без выбранного в чате подключения. В DBeaver она тогда
+    молча ничего не делала, теперь подключение берётся из SQL-редактора, навигатора или диалога выбора.
+  - **Мои промпты.** Сохранённые промпты в *AI → Prompts → My prompts*, вызов из панели AI Chat;
+    `${selection}` подставляет выделенный SQL.
 - **2.0.2** — документация со скриншотами и раздел «Использование»; скриншоты снимаются автоматически
   в CI на DBeaver CE 26.2.1. Код плагина не менялся.
 - **2.0.1** — релиз публикуется сборкой сразу с архивами update site (в 2.0.0 их нет).
@@ -44,14 +53,23 @@ LM Studio, Ollama (`/v1`), корпоративных шлюзов.
 - API-ключ хранится в защищённом хранилище DBeaver, а не в JSON профиля.
 - Дополнительные HTTP-заголовки (Cloudflare Access, корпоративный прокси).
 - Понятные ошибки: `{"detail": ...}` от Open WebUI, 401/404, HTML-страница вместо JSON при неверном URL.
+- Кнопка ▶ под SQL в AI-чате выполняет запрос, даже если в чате не выбрано подключение.
+- «Мои промпты»: сохранённые промпты с подстановкой выделенного SQL.
 - Интерфейс на русском и английском.
 
 ## Требования
 
-- **DBeaver CE 26.2 или новее.** Плагин использует AI API DBeaver (`org.jkiss.dbeaver.model.ai`,
-  `org.jkiss.dbeaver.ui.ai`), он быстро меняется между версиями. Версия, на которой собран и проверен
-  конкретный релиз, указана в его описании.
-- Open WebUI с включёнными API-ключами или любой сервер OpenAI Chat Completions.
+| DBeaver CE | Бандл | Что работает |
+|---|---|---|
+| **26.2 и новее** | `dbeaver.openwebui.ai` | AI Chat, генерация SQL, `@ai`, вызов функций, кнопка ▶, «Мои промпты» |
+| **25.2.4–25.2.5** | `dbeaver.openwebui.ai.compat25` | AI-подсказки и `@ai` в SQL-редакторе, вызов функций (панели AI Chat в CE 25.2 нет) |
+| 25.3.x – 26.1.x, 25.2.3 и старше | — | не поддерживаются: в этих версиях другой AI API |
+
+Оба бандла лежат в одном архиве update site, p2 ставит тот, что подходит установленному DBeaver.
+AI API DBeaver меняется почти в каждой версии, поэтому версии, на которых собран и проверен релиз,
+указаны в его описании.
+
+Нужен Open WebUI с включёнными API-ключами или любой сервер OpenAI Chat Completions.
 
 ## Установка
 
@@ -61,8 +79,17 @@ DBeaver **не подхватывает плагины из папки `dropins`
 1. Скачайте `dbeaver-openwebui-ai-site-<версия>.zip` со страницы
    [Releases](../../releases/latest) (или соберите сами, см. ниже).
 2. DBeaver → **Help → Install New Software… → Add… → Archive…** → выберите zip.
-3. Отметьте *Open WebUI integration*, **Next → Finish**, подтвердите установку неподписанного
-   содержимого, перезапустите DBeaver.
+3. Отметьте категорию **Open WebUI integration целиком** (обе фичи в ней), **Next → Finish**,
+   подтвердите установку неподписанного содержимого, перезапустите DBeaver.
+
+**Обновление.** Тот же порядок: архив новой версии, категория целиком. Мастер сообщит, что установленные
+компоненты будут обновлены, и сам заменит старую версию:
+
+- **2.x:** фича `dbeaver.openwebui.ai.feature` обновляется по совпадающему id;
+- **1.x (`io.dbtools.openwebui`):** в категории есть переходная фича с id старого плагина. Мастер обновляет
+  через неё, старый бандл с отдельной панелью чата удаляется, ставится движок.
+
+Обновление с 2.0.2 и 1.0.2 проверяется в CI тем же механизмом p2 (`InstallOperation`), что и мастер установки.
 
 Для массовой установки без GUI (например, из скрипта развёртывания):
 
@@ -71,19 +98,13 @@ cd "$DBEAVER_HOME"
 jre/bin/java -jar plugins/org.eclipse.equinox.launcher_*.jar -nosplash \
   -application org.eclipse.equinox.p2.director \
   -repository "jar:file:/path/dbeaver-openwebui-ai-site-<версия>.zip!/" \
-  -installIU dbeaver.openwebui.ai.feature.feature.group
+  -installIU dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group
 ```
 
-Обновление с предыдущей версии в консоли — в одной команде снять старую и поставить новую
-(через Help → Install New Software DBeaver делает это сам):
-
-```bash
-... -uninstallIU dbeaver.openwebui.ai.feature.feature.group -installIU dbeaver.openwebui.ai.feature.feature.group
-```
-
-**Если стоял плагин 1.x** (`io.dbtools.openwebui`): удалите его через *Help → About DBeaver →
-Installation Details → Installed Software → Open WebUI for DBeaver → Uninstall*. Оба плагина могут стоять
-одновременно, но это разные продукты. В консоли: `-uninstallIU io.dbtools.openwebui.feature.feature.group`.
+Если в DBeaver нет папки `jre` (так у Linux-архива 25.2.4), вместо `jre/bin/java` укажите Java 21 из системы.
+Director, в отличие от мастера, сам не заменяет старую версию. При обновлении из консоли в той же команде
+снимите старую: `-uninstallIU dbeaver.openwebui.ai.feature.feature.group` (для 2.x) или
+`-uninstallIU io.dbtools.openwebui.feature.feature.group` (для 1.x).
 
 **Удаление:** *Installation Details → Installed Software → Open WebUI engine for DBeaver AI assistant → Uninstall*.
 
@@ -108,6 +129,11 @@ Installation Details → Installed Software → Open WebUI for DBeaver → Unins
 
    ![Проверка подключения](docs/screenshots/test-connection.png)
 
+**DBeaver 25.2.4–25.2.5.** Там профилей нет: *Window → Preferences → AI* → *Engine:* **Open WebUI
+(OpenAI-compatible)**. Поля те же, затем *Test Connection* и *Apply and Close*.
+
+![Настройки на DBeaver 25.2.4](docs/screenshots/dbeaver25-settings.png)
+
 ## Использование
 
 Откройте панель *AI Chat* (*Window → AI Chat*), внизу выберите профиль **Open WebUI** и модель.
@@ -122,8 +148,36 @@ Installation Details → Installed Software → Open WebUI for DBeaver → Unins
 под блоком кода. Если в чате выбрано подключение к БД, модель сама запрашивает список схем, таблиц и DDL
 через функции DBeaver (нужна модель с поддержкой tool calling).
 
-Скриншоты сняты автоматически workflow *docs* на DBeaver CE 26.2.1 с mock-сервером Open WebUI
-(*Actions → docs → Run workflow*, флажок *publish* обновляет картинки в `docs/screenshots`).
+### Кнопка ▶: выполнить SQL из ответа
+
+Штатно DBeaver выполняет запрос только через подключение, выбранное в чате. При «No connection» кнопка
+молча ничего не делает, а в списке подключений чата видны только уже открытые подключения. Плагин
+дополняет кнопку: если подключения в чате нет, он по порядку пробует:
+
+1. подключение активного SQL-редактора;
+2. подключение, выделенное в навигаторе;
+3. единственное подключение проекта;
+4. если ничего не подошло, предлагает выбрать подключение в диалоге.
+
+Затем подключение открывается, и запрос выполняется в SQL-консоли.
+
+![Запрос из ответа выполнен в консоли](docs/screenshots/execute.png)
+
+### Мои промпты
+
+Свои промпты сохраняются в *AI → Prompts → My prompts* (в настройках из шестерёнки панели AI Chat
+или *Window → Preferences*). У каждого промпта есть название, текст и флажок «отправлять сразу».
+Без флажка текст вставляется в поле ввода, чтобы его можно было поправить. `${selection}` заменяется
+выделенным в активном SQL-редакторе текстом, а если ничего не выделено, запросом под курсором.
+
+![Мои промпты](docs/screenshots/prompts.png)
+
+Вызов: кнопка со списком на панели *AI Chat* (рядом с вкладкой) или меню кнопки *AI* на главной панели.
+Промпты хранятся в файле `openwebui-prompts.json` рядом с настройками AI в рабочем пространстве.
+
+![Список промптов в панели чата](docs/screenshots/prompts-menu.png)
+
+Скриншоты сняты автоматически workflow *docs* на DBeaver CE 26.2.1 и 25.2.4 с mock-сервером Open WebUI.
 
 Для SQL лучше подходят модели с нативным tool calling (Qwen2.5/3, Llama 3.1+, GPT-4o и т.п.). Если модель
 не умеет tools, снимите «Разрешить вызов функций»: ассистент будет работать по контексту, без чтения метаданных.
@@ -143,16 +197,16 @@ Installation Details → Installed Software → Open WebUI for DBeaver → Unins
 
 ## Сборка
 
-Нужны JDK 21+ и установленный DBeaver CE 26.2+: он служит целевой платформой и p2-публикатором.
-Maven и доступ в интернет не нужны.
+Нужны JDK 21+ и две установки DBeaver CE: 26.2+ (против неё собирается основной бандл, её p2 публикует
+update site) и 25.2.4/25.2.5 (против неё собирается совместимый бандл). Maven и интернет не нужны.
 
 ```bash
-DBEAVER_HOME=/opt/dbeaver ./scripts/build-offline.sh
-# → dist/dbeaver.openwebui.ai_<версия>.jar и dist/dbeaver-openwebui-ai-site-<версия>.zip
+DBEAVER_HOME=/opt/dbeaver-26.2 DBEAVER25_HOME=/opt/dbeaver-25.2.4 ./scripts/build-offline.sh
+# → dist/dbeaver-openwebui-ai-site-<версия>.zip и jar обоих бандлов
 ```
 
-На macOS `DBEAVER_HOME=/Applications/DBeaver.app/Contents/Eclipse`, на Windows — Git Bash или WSL
-с `DBEAVER_HOME="/c/Program Files/DBeaver"`.
+Без `DBEAVER25_HOME` нужно явно указать `SKIP_COMPAT25=1`: тогда в сайт попадёт только вариант для 26.2+.
+На macOS `DBEAVER_HOME=/Applications/DBeaver.app/Contents/Eclipse`, на Windows — Git Bash или WSL.
 
 ### Тесты
 
@@ -160,52 +214,52 @@ DBEAVER_HOME=/opt/dbeaver ./scripts/build-offline.sh
 DBEAVER_HOME=/opt/dbeaver ./scripts/run-tests.sh       # или GSON_JAR=/path/gson.jar
 ```
 
-45 проверок против mock-сервера Open WebUI, DBeaver запускать не нужно. Код плагина компилируется
-против заглушек API (`tests/api-stubs`, сигнатуры из исходников DBeaver 26.2). Проверяются:
+62 проверки против mock-сервера Open WebUI, DBeaver запускать не нужно: 45 для основного бандла
+(заглушки API в `tests/api-stubs`, сигнатуры из DBeaver 26.2) и 17 для совместимого (`tests/api-stubs-25`,
+из DBeaver 25.2.4). Проверяются:
 нормализация URL, модели и `num_ctx`, 401 и HTML вместо JSON, поток с разорванным `<think>`, usage,
 два tool call с аргументами по кускам и `finish_reason: stop`, аргументы объектом, синхронный режим,
 эмуляция потока, повтор без temperature, ошибка `detail`, конвертация истории (в том числе вызовы
-от другого движка без id), заголовки, отсутствие секретов в JSON профиля.
+от другого движка без id), заголовки, отсутствие секретов в JSON профиля. Для 25.2 дополнительно:
+локальные сообщения не уходят модели, один вызов функции на ответ, подсчёт токенов.
 
 ### CI
 
-GitHub Actions на каждый push и pull request:
+`build` на каждый push и pull request:
 
-1. скачивает последний релиз DBeaver CE (версию можно задать вручную при запуске *Run workflow*);
-2. проверяет, что в нём есть нужные точки расширения AI;
-3. прогоняет тесты;
-4. собирает плагин против настоящих jar DBeaver — это и есть проверка совместимости с его API;
-5. ставит update site через p2 director в копию DBeaver.
+1. скачивает последний релиз DBeaver CE и 25.2.4 (`scripts/get-dbeaver.sh`);
+2. прогоняет тесты обоих бандлов;
+3. собирает их против настоящих jar каждой версии;
+4. проверяет установку через `InstallOperation` (как мастер *Install New Software*): на каждой версии должен
+   встать свой бандл;
+5. проверяет обновление с 2.0.2 (архив из релиза) и с 1.0.2 (собирается из тега `v1.0.2`): старая версия
+   должна удалиться (`scripts/upgrade-test.sh`, `tests/p2test`).
 
-Выпуск версии: поднимите `Bundle-Version` (бандл и feature), затем *Actions → build → Run workflow*
-и в поле *release_tag* укажите `v<версия>`. Workflow соберёт архивы, создаст тег и опубликует релиз
-сразу с файлами. Можно и запушить тег `v<версия>`, результат тот же.
+Выпуск версии: поднимите версию в `MANIFEST.MF` обоих бандлов и в `feature.xml` всех фич, затем
+*Actions → build → Run workflow* с `release_tag` = `v<версия>`. Релиз создаётся, только если все проверки
+прошли. В репозитории включены неизменяемые релизы, поэтому не создавайте релиз вручную через
+*Draft a new release*: он выйдет без архивов.
 
-> В репозитории включены неизменяемые релизы: к опубликованному релизу файлы добавить нельзя.
-> Поэтому не создавайте релиз вручную через *Draft a new release → Publish* — он выйдет без архивов.
+`docs` (запуск вручную) снимает скриншоты в DBeaver 26.2.x и 25.2.4 на виртуальном дисплее с mock Open WebUI.
+Флажок *publish* обновляет картинки в `docs/screenshots`.
 
 ## Структура
 
 ```
-bundles/dbeaver.openwebui.ai/
-  plugin.xml                     регистрация движка и панели настроек
-  META-INF/MANIFEST.MF           OSGi-бандл
-  src/dbeaver/openwebui/model/
-    OpenWebUIEngine.java         AIEngine: модели, запрос, поток, повтор без temperature
-    OpenWebUIClient.java         HTTP: /models, /chat/completions, заголовки, ошибки, нормализация URL
-    OpenWebUIProperties.java     настройки профиля; ключ — в secure storage
-    ChatStreamHandler.java       разбор SSE, сборка tool calls из дельт
-    ChatMessageConverter.java    история DBeaver → messages/tools Chat Completions
-    ThinkTagFilter.java          потоковое удаление <think>…</think>
-    ChatDto.java, JsonSupport.java
-  src/dbeaver/openwebui/ui/
-    OpenWebUIConfigurator.java   SWT-панель настроек (+ сообщения ru/en)
-features/dbeaver.openwebui.ai.feature/   feature для update site
+bundles/dbeaver.openwebui.ai/            DBeaver 26.2+
+  src/dbeaver/openwebui/model/           движок: клиент Chat Completions, SSE, tool calls, <think>
+  src/dbeaver/openwebui/ui/              панель настроек, ChatExecuteFix (кнопка ▶)
+  src/dbeaver/openwebui/prompts/         «Мои промпты»: хранилище, страница настроек, меню
+bundles/dbeaver.openwebui.ai.compat25/   DBeaver 25.2.4–25.2.5: тот же движок под старый AI API
+features/
+  dbeaver.openwebui.ai.feature           зонтичная фича (ставит подходящий вариант)
+  dbeaver.openwebui.ai.dbeaver26.feature вариант для 26.2+
+  dbeaver.openwebui.ai.dbeaver25.feature вариант для 25.2.4–25.2.5
+  io.dbtools.openwebui.feature           переходная фича: обновление с 1.x
 releng/site/category.xml                 категория update site
-scripts/build-offline.sh                 сборка плагина и update site
-scripts/run-tests.sh                     тесты
-scripts/docs-screenshots.sh, docs/demo/  скриншоты для README (workflow docs)
-tests/                                   заглушки API DBeaver, mock Open WebUI, тесты
+scripts/                                 сборка, тесты, проверка установки/обновления, скриншоты
+tests/                                   заглушки API DBeaver 26.2 и 25.2.4, mock Open WebUI, тесты, p2test
+docs/demo, docs/demo25                   сценарии скриншотов
 ```
 
 ### Точки интеграции с DBeaver
@@ -217,9 +271,16 @@ tests/                                   заглушки API DBeaver, mock Open
 
 ## Ограничения
 
-- С настоящим сервером Open WebUI плагин пока не проверялся: в CI вместо него mock-сервер.
-  Запуск в DBeaver 26.2.1, настройки, загрузка моделей, проверка подключения и потоковый ответ в чате
-  проверены в workflow *docs*.
+- С настоящим сервером Open WebUI плагин пока не проверялся: в CI вместо него mock-сервер. В workflow *docs*
+  в живых DBeaver проверены:
+  - **26.2.1:** настройки, загрузка моделей, проверка подключения, потоковый ответ в чате, выполнение SQL
+    из ответа, «Мои промпты»;
+  - **25.2.4:** выбор движка, загрузка моделей, проверка подключения.
+- Кнопки под SQL-блоком в CI нажать нельзя: во встроенном браузере WebKit на раннерах не выполняется
+  JavaScript. Логика кнопки ▶ проверяется тестовым хуком (`-Ddbeaver.openwebui.selftest`), который передаёт
+  SQL в тот же обработчик. Сам обработчик подменяет JS-функцию чата `executeInEditor`. Если в будущей версии
+  DBeaver эта функция изменится, кнопка вернётся к штатному поведению.
+- «Мои промпты» и кнопка ▶ есть только в варианте для DBeaver 26.2+.
 - Update site не подписан: при установке DBeaver попросит подтвердить установку неподписанного содержимого.
 
 ## Лицензия

@@ -37,7 +37,7 @@ shot 16-execute-final
 
 # --- «Мои промпты» из панели чата: выделенный запрос в редакторе подставляется в ${selection}
 xdotool mousemove 1362 102 click 1; sleep 2
-xdotool mousemove 1200 158; sleep 2
+xdotool mousemove 1180 208; sleep 2
 shot 17-prompts-menu
 xdotool mousemove 1180 133 click 1; sleep 12
 shot 18-prompt-sent
