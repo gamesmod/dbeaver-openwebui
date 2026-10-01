@@ -22,10 +22,17 @@ xdotool key ctrl+Return; sleep 12
 shot 11-chat-answer
 windows after-chat
 
+# --- проверка, что клики доходят до веб-страницы чата: кнопка «копировать»
+xdotool mousemove 1401 489; sleep 1; xdotool click 1; sleep 2
+xclip -o -selection clipboard > "$RAW/clipboard.txt" 2>&1 || true
+echo "clipboard: $(head -c 80 "$RAW/clipboard.txt")"
+
 # --- кнопка выполнения запроса из ответа
 xdotool mousemove 1337 489; sleep 2
 shot 13-play-hover
-xdotool click 1; sleep 15
+xdotool click 1; sleep 3
+grep -i "open webui" "$WS/.metadata/dbeaver-debug.log" | tail -5
+xdotool click 1; sleep 12
 windows after-play
 shot 14-play-result
 for i in 1 2; do

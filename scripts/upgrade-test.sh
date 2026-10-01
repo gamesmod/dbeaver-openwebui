@@ -3,6 +3,10 @@
 # в копию DBeaver ставится старая версия, затем выбираются все фичи категории нового сайта.
 #   ./scripts/upgrade-test.sh <DBeaver home> <старый site.zip> <корневая IU старой версии> <новый site.zip> <ожидаемый бандл>
 set -euo pipefail
+# Вывод дублируется в файл: при ошибке хвост попадает в аннотацию GitHub Actions
+LOG="$(mktemp)"
+exec > >(tee "$LOG") 2>&1
+trap 'rc=$?; if [ $rc -ne 0 ] && [ -n "${GITHUB_ACTIONS:-}" ]; then sleep 1; echo "::error title=upgrade-test failed::$(tail -60 "$LOG" | sed -e "s/%/%25/g" | sed -e ":a;N;\$!ba;s/\n/%0A/g")"; fi' EXIT
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 SRC_HOME="$1"; OLD_SITE="$2"; OLD_IU="$3"; NEW_SITE="$4"; EXPECT_BUNDLE="$5"
 H="$(mktemp -d)/dbeaver"
