@@ -27,4 +27,44 @@
         <workbenchWindowInitializer class="dbeaver.openwebui.ui.ChatExecuteFix" order="10"/>
     </extension>
 
+    <!-- Мои промпты: страница в AI → Prompts и выпадающий список на панели AI-чата -->
+    <extension point="org.eclipse.ui.preferencePages">
+        <page id="dbeaver.openwebui.preferences.prompts"
+              category="org.jkiss.dbeaver.preferences.ai.prompts"
+              class="dbeaver.openwebui.prompts.SavedPromptsPage"
+              name="%prompts.page.name"/>
+    </extension>
+    <extension point="org.eclipse.ui.propertyPages">
+        <page id="dbeaver.openwebui.preferences.prompts"
+              category="org.jkiss.dbeaver.preferences.ai.prompts"
+              class="dbeaver.openwebui.prompts.SavedPromptsPage"
+              name="%prompts.page.name">
+            <enabledWhen><reference definitionId="org.jkiss.dbeaver.ai.preferences"/></enabledWhen>
+        </page>
+    </extension>
+    <extension point="org.eclipse.ui.commands">
+        <command id="dbeaver.openwebui.prompts.open" name="%prompts.command.name"
+                 description="%prompts.command.description" categoryId="com.dbeaver.ai"/>
+    </extension>
+    <extension point="org.eclipse.ui.handlers">
+        <handler commandId="dbeaver.openwebui.prompts.open" class="dbeaver.openwebui.prompts.OpenPromptsHandler"/>
+    </extension>
+    <extension point="org.eclipse.ui.commandImages">
+        <image commandId="dbeaver.openwebui.prompts.open" icon="icons/prompts.svg"/>
+    </extension>
+    <extension point="org.eclipse.ui.menus">
+        <menuContribution allPopups="false" locationURI="toolbar:com.dbeaver.ai.chat">
+            <command commandId="dbeaver.openwebui.prompts.open" id="dbeaver.openwebui.prompts.dropdown"
+                     style="pulldown" label="%prompts.menu.label" tooltip="%prompts.command.description"/>
+        </menuContribution>
+        <menuContribution allPopups="false" locationURI="menu:dbeaver.openwebui.prompts.dropdown">
+            <dynamic id="dbeaver.openwebui.prompts.items" class="dbeaver.openwebui.prompts.SavedPromptsMenu"/>
+        </menuContribution>
+        <menuContribution allPopups="false" locationURI="menu:ai.dropdown.menu?after=configuration">
+            <menu id="dbeaver.openwebui.prompts.submenu" label="%prompts.menu.label" icon="icons/prompts.svg">
+                <dynamic id="dbeaver.openwebui.prompts.items.main" class="dbeaver.openwebui.prompts.SavedPromptsMenu"/>
+            </menu>
+        </menuContribution>
+    </extension>
+
 </plugin>

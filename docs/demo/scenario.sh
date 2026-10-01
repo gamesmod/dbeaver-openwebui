@@ -23,9 +23,16 @@ shot 11-chat-answer
 windows after-chat
 
 # --- проверка, что клики доходят до веб-страницы чата: кнопка «копировать»
+clip() { xclip -o -selection clipboard -t UTF8_STRING 2>/dev/null | head -c 60; }
 xdotool mousemove 1401 489; sleep 1; xdotool click 1; sleep 2
-xclip -o -selection clipboard > "$RAW/clipboard.txt" 2>&1 || true
-echo "clipboard: $(head -c 80 "$RAW/clipboard.txt")"
+echo "clipboard after click: [$(clip)]"
+xdotool mousemove 1395 485; sleep 0.5; xdotool mousemove 1401 489; sleep 0.5
+xdotool mousedown 1; sleep 0.2; xdotool mouseup 1; sleep 2
+echo "clipboard after down/up: [$(clip)]"
+W=$(xdotool getmouselocation --shell | grep WINDOW | cut -d= -f2)
+echo "window under mouse: $W $(xdotool getwindowname "$W" 2>/dev/null)"
+xdotool click --window "$W" 1; sleep 2
+echo "clipboard after window click: [$(clip)]"
 
 # --- кнопка выполнения запроса из ответа
 xdotool mousemove 1337 489; sleep 2

@@ -6,6 +6,7 @@ Bundle-SymbolicName: dbeaver.openwebui.ai;singleton:=true
 Bundle-Version: 2.1.0.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
+Bundle-Localization: OSGI-INF/l10n/bundle
 Automatic-Module-Name: dbeaver.openwebui.ai
 Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.swt,
@@ -21,9 +22,12 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.jface.text,
  org.jkiss.dbeaver.ui.editors.base,
  org.jkiss.dbeaver.ui.editors.sql,
- org.jkiss.dbeaver.ui.navigator
+ org.jkiss.dbeaver.ui.navigator,
+ org.eclipse.core.commands,
+ org.eclipse.core.expressions
 Import-Package: com.google.gson,
  com.google.gson.annotations,
  com.google.gson.reflect
 Export-Package: dbeaver.openwebui.model,
+ dbeaver.openwebui.prompts,
  dbeaver.openwebui.ui

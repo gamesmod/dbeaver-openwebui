@@ -50,6 +50,7 @@ build_bundle() {  # build_bundle <имя бандла> <DBeaver home>
   (cd "$dir/src" && find . -name '*.properties' | while read -r f; do
     mkdir -p "$out/classes/$(dirname "$f")"; cp "$f" "$out/classes/$f"; done)
   cp -r "$dir/plugin.xml" "$dir/icons" "$out/classes/"
+  if [ -d "$dir/OSGI-INF" ]; then cp -r "$dir/OSGI-INF" "$out/classes/"; fi
   local base; base="$(sed -n 's/^Bundle-Version: \([0-9.]*\)\.qualifier.*/\1/p' "$dir/META-INF/MANIFEST.MF" | tr -d '\r')"
   sed "s/$base.qualifier/$VERSION/" "$dir/META-INF/MANIFEST.MF" > "$out/MANIFEST.MF"
   (cd "$out/classes" && "$JAR" cfm "$WORK/src/plugins/${name}_$VERSION.jar" "$out/MANIFEST.MF" .)
