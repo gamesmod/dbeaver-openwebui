@@ -1,0 +1,26 @@
+dialog: Statistics collection 
+shot 01-dialog-1
+dialog: Create sample database 
+shot 01-dialog-2
+dialog: Version update 
+shot 01-dialog-3
+activate DBeaver -> 4194560
+shot 02-main
+shot 03-window-menu
+--- windows (prefs)
+4194560 Window 4194560   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 25.2.4 
+4197603 Window 4197603   Position: 152,94 (screen: 0)   Geometry: 1140x800  :: Preferences 
+shot 04-prefs-ai
+shot 05-ai-page
+shot 06-engine-combo
+--- windows (engine-selected)
+4203606 Window 4203606   Position: 251,238 (screen: 0)   Geometry: 549x66  :: DBeaver
+4194560 Window 4194560   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 25.2.4 
+4197603 Window 4197603   Position: 152,44 (screen: 0)   Geometry: 1140x988  :: Preferences 
+shot 07-openwebui-selected
+shot 08-filled
+shot 09-models-refreshed
+shot 10-models-list
+--- windows (test-connection)
+4194560 Window 4194560   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 25.2.4 
+shot 11-test-connection

@@ -1,0 +1,5 @@
+--- windows (start)
+4194560 Window 4194560   Position: 2,44 (screen: 0)   Geometry: 1074x646  :: DBeaver 25.2.4 
+4194966 Window 4194966   Position: 202,144 (screen: 0)   Geometry: 674x327  :: Statistics collection 
+--- windows (end)
+4194560 Window 4194560   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 25.2.4 
