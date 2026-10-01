@@ -82,4 +82,4 @@ class H(BaseHTTPRequestHandler):
             send("data: " + json.dumps({"choices": [], "usage": {"prompt_tokens": 120, "completion_tokens": 9, "prompt_tokens_details": {"cached_tokens": 100}}}))
         send("data: [DONE]")
         self.wfile.write(b"0\r\n\r\n"); self.wfile.flush()
-ThreadingHTTPServer(("127.0.0.1", 18080), H).serve_forever()
+ThreadingHTTPServer(("127.0.0.1", int(os.environ.get("MOCK_PORT", "18080"))), H).serve_forever()

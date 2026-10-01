@@ -32,4 +32,24 @@ activate DBeaver
 xdotool mousemove 1412 143 click 1; sleep 5
 windows settings
 wmctrl -r :ACTIVE: -e 0,150,50,1140,800; sleep 2
+xdotool mousemove 700 760; sleep 2
 shot 20-settings
+shotwin 20-settings-win "Properties for"
+
+# --- проверка подключения
+xdotool mousemove 408 682 click 1; sleep 5
+windows test-connection
+shot 21-test-connection
+xdotool key Return; sleep 2
+
+# --- новый профиль: выбор движка
+xdotool mousemove 1272 138 click 1; sleep 4
+windows new-profile
+shot 22-new-profile
+xdotool key Escape; sleep 2
+xdotool key Escape; sleep 2
+
+# --- итоговые картинки
+crop 11-chat-answer chat 1440x870+0+0
+crop 11-chat-answer chat-panel 325x790+1115+85
+crop 12-models models 325x200+1115+670

@@ -4,6 +4,8 @@
 # Используется в .github/workflows/docs.yml. Нужны: xvfb, xdotool, imagemagick, DBeaver с плагином.
 #   DBEAVER_HOME=... OUT=docs/screenshots ./scripts/docs-screenshots.sh
 set -uo pipefail
+# Адрес из docs/demo/ai-configuration.json: openwebui.local → 127.0.0.1
+grep -q openwebui.local /etc/hosts || echo '127.0.0.1 openwebui.local' | sudo tee -a /etc/hosts >/dev/null
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 : "${DBEAVER_HOME:?}"
 OUT="${OUT:-$ROOT/docs/screenshots}"
@@ -18,9 +20,12 @@ sleep 2
 openbox >/dev/null 2>&1 &   # оконный менеджер: без него не работает фокус клавиатуры
 sleep 1
 
-MOCK_DEMO=1 MOCK_DEMO_ANSWER="$ROOT/docs/demo/answer.md" python3 "$ROOT/tests/mock_owui.py" &
+MOCK_PORT=3000 MOCK_DEMO=1 MOCK_DEMO_ANSWER="$ROOT/docs/demo/answer.md" python3 "$ROOT/tests/mock_owui.py" &
 sleep 1
 
+crop() {  # crop <исходный кадр> <итоговое имя> <геометрия WxH+X+Y> — итоговая картинка для README
+  convert "$RAW/$1.png" -crop "$3" +repage "$OUT/$2.png" && echo "crop $2"
+}
 shot() {  # shot <name> — весь экран
   import -window root "$RAW/$1.png"; echo "shot $1"
 }

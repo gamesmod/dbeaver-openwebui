@@ -4,7 +4,7 @@
       "name": "Open WebUI",
       "engine": "openwebui",
       "configuration": {
-        "openwebui.base_url": "http://127.0.0.1:18080/api",
+        "openwebui.base_url": "http://openwebui.local:3000/api",
         "openwebui.token": "sk-test",
         "openwebui.model": "qwen2.5-coder:14b",
         "openwebui.contextWindowSize": 32768
