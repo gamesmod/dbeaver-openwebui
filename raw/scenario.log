@@ -1,0 +1,69 @@
+activate Product Configuration -> 6291490
+--- windows (after-wizard)
+6291471 Window 6291471   Position: 2,44 (screen: 0)   Geometry: 1018x739  :: DBeaver 26.2.1 
+shot 01-after-wizard
+closing dialog: DBeaver 26.2.1 
+shot 02-dialog-1
+closing dialog: DBeaver 26.2.1 
+shot 02-dialog-2
+closing dialog: DBeaver 26.2.1 
+shot 02-dialog-3
+activate DBeaver -> 6291471
+shot 03-main
+shot 04-window-menu
+shot 10-chat-typed
+shot 11-chat-answer
+--- windows (after-chat)
+6291471 Window 6291471   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 26.2.1 
+--- windows (after-execute)
+6291471 Window 6291471   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 26.2.1 - <Магазин (SQLite)> Console 
+6296590 Window 6296590   Position: 537,295 (screen: 0)   Geometry: 370x276  :: Driver settings 
+> Start Open WebUI engine for DBeaver AI assistant [dbeaver.openwebui.ai 2.2.0.v202610011554]
+2026-10-01 15:55:40.880 - Open WebUI: AI chat execute handler installed
+2026-10-01 15:56:12.905 - Open WebUI selftest: JS call executed=false
+2026-10-01 15:56:15.906 - Open WebUI selftest: JS bridge called handler=false
+2026-10-01 15:56:15.907 - Open WebUI: chat has no connection, using Магазин (SQLite)
+shot 14-execute-result
+dialog after execute: Driver settings 
+shot 15-execute-dialog-1
+shot 16-execute-final
+shot 17-prompts-menu
+shot 18-prompt-sent
+shot 12-models
+activate DBeaver -> 6291471
+--- windows (settings)
+6305467 Window 6305467   Position: 1278,162 (screen: 0)   Geometry: 162x47  :: DBeaver
+6291471 Window 6291471   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 26.2.1 - <Магазин (SQLite)> Console 
+6305494 Window 6305494   Position: 358,44 (screen: 0)   Geometry: 729x871  :: Properties for  
+shot 20-settings
+shotwin 20-settings-win
+--- windows (test-connection)
+6291471 Window 6291471   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 26.2.1 - <Магазин (SQLite)> Console 
+6305494 Window 6305494   Position: 152,94 (screen: 0)   Geometry: 1140x800  :: Properties for  
+shot 21-test-connection
+--- windows (new-profile)
+6322158 Window 6322158   Position: 1207,152 (screen: 0)   Geometry: 140x47  :: DBeaver
+6291471 Window 6291471   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 26.2.1 - <Магазин (SQLite)> Console 
+6305494 Window 6305494   Position: 152,94 (screen: 0)   Geometry: 1140x800  :: Properties for  
+6319672 Window 6319672   Position: 547,332 (screen: 0)   Geometry: 350x236  :: Choose AI engine 
+shot 22-new-profile
+shot 23-engines-list
+activate DBeaver -> 6291471
+shot 30-prompts-page
+activate DBeaver -> 6291471
+shot 31-main-with-toolbar
+activate DBeaver -> 6291471
+shot 32-editor-context
+activate DBeaver -> 6291471
+shot 40-settings-meta
+crop chat
+crop chat-panel
+crop models
+copy settings
+crop test-connection
+crop new-profile
+crop prompts
+crop prompts-menu
+crop execute
+crop editor-prompts
+crop metadata

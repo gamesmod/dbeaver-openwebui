@@ -1,0 +1,86 @@
+2026-10-01 15:55:07.947 - DBeaver 26.2.1.202609210342 is starting
+2026-10-01 15:55:07.948 - OS: Linux 6.17.0-1022-azure (amd64)
+2026-10-01 15:55:07.948 - Java version: 25.0.3 by Eclipse Adoptium (64bit)
+2026-10-01 15:55:07.948 - Install path: '/home/runner/work/_temp/dbeaver-docs'
+2026-10-01 15:55:07.948 - Instance path: 'file:/home/runner/work/_temp/ws/'
+2026-10-01 15:55:07.949 - Memory available 180Mb/3998Mb
+2026-10-01 15:55:07.954 - Initialize desktop platform...
+2026-10-01 15:55:08.096 - BounceCastle bundle found. Use JCE provider BC
+> Start Core File Systems [org.eclipse.core.filesystem 1.11.500.v20260721-1509]
+> Start Core Resource Management [org.eclipse.core.resources 3.24.100.v20260812-0827]
+> Start Team Support Core [org.eclipse.team.core 3.10.1100.v20260612-1500]
+> Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.187.202609210342]
+> Start JFace Text [org.eclipse.jface.text 3.31.100.v20260814-0956]
+> Start Text [org.eclipse.text 3.14.800.v20260815-0849]
+2026-10-01 15:55:08.322 - Initialize base platform...
+2026-10-01 15:55:08.341 - Platform initialized (387ms)
+2026-10-01 15:55:08.347 - 	Create display
+2026-10-01 15:55:08.843 - 	Patch workbench configuration
+2026-10-01 15:55:08.877 - 	Starting instance server at http://localhost:46569
+2026-10-01 15:55:08.882 - Run workbench
+> Start Eclipse IDE UI [org.eclipse.ui.ide 3.23.200.v20260822-1631]
+> Start Eclipse e4 Workbench SWT [org.eclipse.e4.ui.workbench.swt 0.18.200.v20260707-1437]
+> Start Eclipse Application Services [org.eclipse.e4.core.services 2.5.400.v20260430-1313]
+> Start Eclipse UI Application Services [org.eclipse.e4.ui.services 1.6.700.v20260430-1313]
+> Start Eclipse e4 Progress View [org.eclipse.e4.ui.progress 0.5.100.v20260516-1214]
+> Start Eclipse Bindings Support [org.eclipse.e4.ui.bindings 0.15.200.v20260616-1114]
+> Start Eclipse e4 core commands [org.eclipse.e4.core.commands 1.1.800.v20260430-1313]
+> Start EMF XML/XMI Persistence [org.eclipse.emf.ecore.xmi 2.41.0.v20260704-1256]
+> Start Eclipse e4 Workbench Add-ons [org.eclipse.e4.ui.workbench.addons.swt 1.6.100.v20260430-1313]
+> Start Eclipse e4 Workbench SWT Renderer [org.eclipse.e4.ui.workbench.renderers.swt 0.18.100.v20260622-1026]
+> Start Eclipse Dependency Injection Extensions [org.eclipse.e4.core.di.extensions 0.18.300.v20240413-1529]
+> Start DBeaver AI Model [org.jkiss.dbeaver.model.ai 2.0.30.202609210342]
+> Start Open WebUI engine for DBeaver AI assistant [dbeaver.openwebui.ai 2.2.0.v202610011554]
+> Start DBeaver AI UI [org.jkiss.dbeaver.ui.ai 1.0.89.202609210342]
+> Start Eclipse CSS SWT Support [org.eclipse.e4.ui.css.swt 0.17.100.v20260730-1116]
+> Start Equinox Java Authentication and Authorization Service (JAAS) [org.eclipse.equinox.security 1.4.700.v20250622-1644]
+> Start Internet Connection Management UI [org.eclipse.ui.net 1.6.0.v20251219-1227]
+> Start Internet Connection Management [org.eclipse.core.net 1.5.900.v20260507-0401]
+> Start GEF Classic Draw2d [org.eclipse.draw2d 3.23.100.202608071137]
+> Start GEF Classic GEF (MVC) [org.eclipse.gef 3.26.100.202608071137]
+> Start Eclipse CSS SWT Theme Support [org.eclipse.e4.ui.css.swt.theme 0.15.200.v20260806-0515]
+> Start Eclipse SDK Themes [org.eclipse.ui.themes 1.3.0.v20260508-0854]
+2026-10-01 15:55:09.911 - Configure workbench window
+> Start DBeaver Product Configuration UI [org.jkiss.dbeaver.ui.app.config 1.0.5.202609210342]
+> Start DBeaver UI Forms Toolkit [org.jkiss.dbeaver.ui.forms 1.0.15.202609210342]
+> Start JFace Data Binding [org.eclipse.core.databinding 1.13.800.v20260531-1157]
+> Start JFace Data Binding Properties [org.eclipse.core.databinding.property 1.10.500.v20250916-0931]
+> Start DBeaver Sample Database [org.jkiss.dbeaver.ui.config.sample 1.0.224.202609210342]
+> Start DBeaver SQL Model [org.jkiss.dbeaver.model.sql 1.0.177.202609210342]
+2026-10-01 15:55:37.702 - Total database drivers: 138 (138)
+> Start Help System Core [org.eclipse.help 3.11.200.v20260710-0925]
+2026-10-01 15:55:37.769 - Create actions
+> Start Default Text Editor [org.eclipse.ui.editors 3.22.100.v20260707-0708]
+> Start Text Editor Framework [org.eclipse.ui.workbench.texteditor 3.20.200.v20260728-1331]
+> Start DBeaver UI Editors - Data [org.jkiss.dbeaver.ui.editors.data 1.0.187.202609210342]
+> Start DBeaver UI Editors - SQL [org.jkiss.dbeaver.ui.editors.sql 1.0.187.202609210342]
+2026-10-01 15:55:40.205 - Initialize workbench window
+2026-10-01 15:55:40.228 - Finish initialization
+> Start DBeaver NIO Model [org.jkiss.dbeaver.model.nio 1.0.71.202609210342]
+> Start DBeaver Dashboard UI [org.jkiss.dbeaver.ui.dashboard 1.0.184.202609210342]
+> Start DBeaver ERD UI [org.jkiss.dbeaver.ui.editors.erd 3.1.28.202609210342]
+> Start DBeaver ERD Model [org.jkiss.dbeaver.model.erd 1.1.28.202609210342]
+2026-10-01 15:55:40.805 - Open [https://dbeaver.io/product/version.xml]
+2026-10-01 15:55:40.880 - Open WebUI: AI chat execute handler installed
+2026-10-01 15:56:12.905 - Open WebUI selftest: JS call executed=false
+2026-10-01 15:56:15.906 - Open WebUI selftest: JS bridge called handler=false
+2026-10-01 15:56:15.907 - Open WebUI: chat has no connection, using Магазин (SQLite)
+> Start DBeaver SQL Terminal [org.jkiss.dbeaver.ui.editors.sql.terminal 1.0.163.202609210342]
+> Start Core Compare Support [org.eclipse.compare.core 3.8.900.v20260731-0809]
+> Start Compare Support [org.eclipse.compare 3.12.200.v20260814-1536]
+> Start Console [org.eclipse.ui.console 3.17.100.v20260804-1532]
+> Start Debug Core [org.eclipse.debug.core 3.24.0.v20260714-0955]
+> Start DBeaver JDBC Model [org.jkiss.dbeaver.model.jdbc 1.0.80.202609210342]
+> Start DBeaver Generic Plug-in [org.jkiss.dbeaver.ext.generic 2.3.273.202609210342]
+> Start DBeaver SQLite Model [org.jkiss.dbeaver.ext.sqlite 1.0.236.202609210342]
+2026-10-01 15:56:16.734 - Open [https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/maven-metadata.xml]
+2026-10-01 15:56:16.821 - Open [https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.53.4.0/sqlite-jdbc-3.53.4.0.pom]
+2026-10-01 15:56:16.864 - Open [https://repo1.maven.org/maven2/org/junit/junit-bom/5.12.2/junit-bom-5.12.2.pom]
+2026-10-01 15:56:37.328 - Open [https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.53.4.0/sqlite-jdbc-3.53.4.0.jar]
+2026-10-01 15:56:37.712 - Connect with 'Магазин (SQLite)' (sqlite-shop)
+2026-10-01 15:56:37.767 - Execution context opened (Магазин (SQLite); Main; 0)
+2026-10-01 15:56:37.911 - Connected to a datasource: id='sqlite-shop', databaseProductName='SQLite', databaseProductVersion='3.53.4', driverName='SQLite JDBC', driverVersion='3.53.4.0'.
+> Start org.jkiss.bundle.gis [org.jkiss.bundle.gis 2.0.10]
+> Start DBeaver GIS Support [org.jkiss.dbeaver.data.gis 1.0.211.202609210342]
+> Start DBeaver SQL Language Semantic Model [org.jkiss.dbeaver.model.lsm 1.0.82.202609210342]
+> Start DBeaver SQLite UI [org.jkiss.dbeaver.ext.sqlite.ui 1.0.157.202609210342]

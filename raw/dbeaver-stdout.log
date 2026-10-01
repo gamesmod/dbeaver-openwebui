@@ -1,0 +1,263 @@
+> Start DBeaver Application Standalone [org.jkiss.dbeaver.ui.app.standalone 26.2.1.202609210342]
+> Start DBeaver Command Line Model [org.jkiss.dbeaver.model.cli 1.0.32.202609210342]
+> Start Eclipse IDE UI Application [org.eclipse.ui.ide.application 1.6.200.v20260704-1759]
+> Start Expression Language [org.eclipse.core.expressions 3.9.700.v20260710-0925]
+> Start DBeaver Model Registry [org.jkiss.dbeaver.registry 1.0.181.202609210342]
+> Start jna [com.sun.jna 5.19.1.v20260612-1000]
+> Start DBeaver UI Editors - Base [org.jkiss.dbeaver.ui.editors.base 1.0.187.202609210342]
+> Start DBeaver UI [org.jkiss.dbeaver.ui 5.1.202.202609210342]
+> Start DBeaver Usage Statistics [org.jkiss.dbeaver.ui.statistics 1.0.83.202609210342]
+> Start DBeaver UI Editors - Connections [org.jkiss.dbeaver.ui.editors.connection 1.0.178.202609210342]
+
+(java:4585): dbind-WARNING **: 15:55:07.781: AT-SPI: Error retrieving accessibility bus address: org.freedesktop.DBus.Error.ServiceUnknown: The name org.a11y.Bus was not provided by any .service files
+> Start DBeaver Desktop Application Core [org.jkiss.dbeaver.core 26.2.1.202609210342]
+2026-10-01 15:55:07.947 - DBeaver 26.2.1.202609210342 is starting
+2026-10-01 15:55:07.948 - OS: Linux 6.17.0-1022-azure (amd64)
+2026-10-01 15:55:07.948 - Java version: 25.0.3 by Eclipse Adoptium (64bit)
+2026-10-01 15:55:07.948 - Install path: '/home/runner/work/_temp/dbeaver-docs'
+2026-10-01 15:55:07.948 - Instance path: 'file:/home/runner/work/_temp/ws/'
+2026-10-01 15:55:07.949 - Memory available 180Mb/3998Mb
+2026-10-01 15:55:07.954 - Initialize desktop platform...
+2026-10-01 15:55:08.096 - BounceCastle bundle found. Use JCE provider BC
+> Start Core File Systems [org.eclipse.core.filesystem 1.11.500.v20260721-1509]
+> Start Core Resource Management [org.eclipse.core.resources 3.24.100.v20260812-0827]
+> Start Team Support Core [org.eclipse.team.core 3.10.1100.v20260612-1500]
+> Start DBeaver UI Navigator [org.jkiss.dbeaver.ui.navigator 1.0.187.202609210342]
+> Start JFace Text [org.eclipse.jface.text 3.31.100.v20260814-0956]
+> Start Text [org.eclipse.text 3.14.800.v20260815-0849]
+2026-10-01 15:55:08.322 - Initialize base platform...
+2026-10-01 15:55:08.341 - Platform initialized (387ms)
+2026-10-01 15:55:08.347 - 	Create display
+
+(java:4585): Gdk-CRITICAL **: 15:55:08.349: gdk_threads_set_lock_functions: assertion 'gdk_threads_lock == NULL && gdk_threads_unlock == NULL' failed
+2026-10-01 15:55:08.843 - 	Patch workbench configuration
+2026-10-01 15:55:08.877 - 	Starting instance server at http://localhost:46569
+2026-10-01 15:55:08.882 - Run workbench
+> Start Eclipse IDE UI [org.eclipse.ui.ide 3.23.200.v20260822-1631]
+> Start Eclipse e4 Workbench SWT [org.eclipse.e4.ui.workbench.swt 0.18.200.v20260707-1437]
+> Start Eclipse Application Services [org.eclipse.e4.core.services 2.5.400.v20260430-1313]
+> Start Eclipse UI Application Services [org.eclipse.e4.ui.services 1.6.700.v20260430-1313]
+> Start Eclipse e4 Progress View [org.eclipse.e4.ui.progress 0.5.100.v20260516-1214]
+> Start Eclipse Bindings Support [org.eclipse.e4.ui.bindings 0.15.200.v20260616-1114]
+> Start Eclipse e4 core commands [org.eclipse.e4.core.commands 1.1.800.v20260430-1313]
+> Start EMF XML/XMI Persistence [org.eclipse.emf.ecore.xmi 2.41.0.v20260704-1256]
+> Start Eclipse e4 Workbench Add-ons [org.eclipse.e4.ui.workbench.addons.swt 1.6.100.v20260430-1313]
+> Start Eclipse e4 Workbench SWT Renderer [org.eclipse.e4.ui.workbench.renderers.swt 0.18.100.v20260622-1026]
+> Start Eclipse Dependency Injection Extensions [org.eclipse.e4.core.di.extensions 0.18.300.v20240413-1529]
+> Start DBeaver AI Model [org.jkiss.dbeaver.model.ai 2.0.30.202609210342]
+> Start Open WebUI engine for DBeaver AI assistant [dbeaver.openwebui.ai 2.2.0.v202610011554]
+> Start DBeaver AI UI [org.jkiss.dbeaver.ui.ai 1.0.89.202609210342]
+> Start Eclipse CSS SWT Support [org.eclipse.e4.ui.css.swt 0.17.100.v20260730-1116]
+> Start Equinox Java Authentication and Authorization Service (JAAS) [org.eclipse.equinox.security 1.4.700.v20250622-1644]
+> Start Internet Connection Management UI [org.eclipse.ui.net 1.6.0.v20251219-1227]
+> Start Internet Connection Management [org.eclipse.core.net 1.5.900.v20260507-0401]
+> Start GEF Classic Draw2d [org.eclipse.draw2d 3.23.100.202608071137]
+> Start GEF Classic GEF (MVC) [org.eclipse.gef 3.26.100.202608071137]
+> Start Eclipse CSS SWT Theme Support [org.eclipse.e4.ui.css.swt.theme 0.15.200.v20260806-0515]
+> Start Eclipse SDK Themes [org.eclipse.ui.themes 1.3.0.v20260508-0854]
+2026-10-01 15:55:09.911 - Configure workbench window
+> Start DBeaver Product Configuration UI [org.jkiss.dbeaver.ui.app.config 1.0.5.202609210342]
+> Start DBeaver UI Forms Toolkit [org.jkiss.dbeaver.ui.forms 1.0.15.202609210342]
+> Start JFace Data Binding [org.eclipse.core.databinding 1.13.800.v20260531-1157]
+> Start JFace Data Binding Properties [org.eclipse.core.databinding.property 1.10.500.v20250916-0931]
+> Start DBeaver Sample Database [org.jkiss.dbeaver.ui.config.sample 1.0.224.202609210342]
+> Start DBeaver SQL Model [org.jkiss.dbeaver.model.sql 1.0.177.202609210342]
+2026-10-01 15:55:37.702 - Total database drivers: 138 (138)
+> Start Help System Core [org.eclipse.help 3.11.200.v20260710-0925]
+2026-10-01 15:55:37.769 - Create actions
+> Start Default Text Editor [org.eclipse.ui.editors 3.22.100.v20260707-0708]
+> Start Text Editor Framework [org.eclipse.ui.workbench.texteditor 3.20.200.v20260728-1331]
+> Start DBeaver UI Editors - Data [org.jkiss.dbeaver.ui.editors.data 1.0.187.202609210342]
+> Start DBeaver UI Editors - SQL [org.jkiss.dbeaver.ui.editors.sql 1.0.187.202609210342]
+libEGL warning: DRI3 error: Could not get DRI3 device
+libEGL warning: Ensure your X server supports DRI3 to get accelerated rendering
+2026-10-01 15:55:40.205 - Initialize workbench window
+2026-10-01 15:55:40.228 - Finish initialization
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:55:40.274: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:55:40.343: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:55:40.483: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:55:40.597: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+> Start DBeaver NIO Model [org.jkiss.dbeaver.model.nio 1.0.71.202609210342]
+> Start DBeaver Dashboard UI [org.jkiss.dbeaver.ui.dashboard 1.0.184.202609210342]
+> Start DBeaver ERD UI [org.jkiss.dbeaver.ui.editors.erd 3.1.28.202609210342]
+> Start DBeaver ERD Model [org.jkiss.dbeaver.model.erd 1.1.28.202609210342]
+2026-10-01 15:55:40.805 - Open [https://dbeaver.io/product/version.xml]
+2026-10-01 15:55:40.880 - Open WebUI: AI chat execute handler installed
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:55:40.890: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+2026-10-01 15:56:12.905 - Open WebUI selftest: JS call executed=false
+2026-10-01 15:56:15.906 - Open WebUI selftest: JS bridge called handler=false
+2026-10-01 15:56:15.907 - Open WebUI: chat has no connection, using Магазин (SQLite)
+> Start DBeaver SQL Terminal [org.jkiss.dbeaver.ui.editors.sql.terminal 1.0.163.202609210342]
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:16.022: GtkToolbar 0x7f4b99e5a700 reported min size 34 and natural size 31 in get_preferred_height(); natural size must be >= min size
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:16.042: Negative content height -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:16.048: Negative content height -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+> Start Core Compare Support [org.eclipse.compare.core 3.8.900.v20260731-0809]
+> Start Compare Support [org.eclipse.compare 3.12.200.v20260814-1536]
+> Start Console [org.eclipse.ui.console 3.17.100.v20260804-1532]
+> Start Debug Core [org.eclipse.debug.core 3.24.0.v20260714-0955]
+> Start DBeaver JDBC Model [org.jkiss.dbeaver.model.jdbc 1.0.80.202609210342]
+> Start DBeaver Generic Plug-in [org.jkiss.dbeaver.ext.generic 2.3.273.202609210342]
+> Start DBeaver SQLite Model [org.jkiss.dbeaver.ext.sqlite 1.0.236.202609210342]
+2026-10-01 15:56:16.734 - Open [https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/maven-metadata.xml]
+2026-10-01 15:56:16.821 - Open [https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.53.4.0/sqlite-jdbc-3.53.4.0.pom]
+2026-10-01 15:56:16.864 - Open [https://repo1.maven.org/maven2/org/junit/junit-bom/5.12.2/junit-bom-5.12.2.pom]
+2026-10-01 15:56:37.328 - Open [https://repo1.maven.org/maven2/org/xerial/sqlite-jdbc/3.53.4.0/sqlite-jdbc-3.53.4.0.jar]
+2026-10-01 15:56:37.712 - Connect with 'Магазин (SQLite)' (sqlite-shop)
+2026-10-01 15:56:37.767 - Execution context opened (Магазин (SQLite); Main; 0)
+2026-10-01 15:56:37.911 - Connected to a datasource: id='sqlite-shop', databaseProductName='SQLite', databaseProductVersion='3.53.4', driverName='SQLite JDBC', driverVersion='3.53.4.0'.
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.171: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.178: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.190: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.204: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.209: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.235: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.236: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.236: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.237: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.237: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+> Start org.jkiss.bundle.gis [org.jkiss.bundle.gis 2.0.10]
+> Start DBeaver GIS Support [org.jkiss.dbeaver.data.gis 1.0.211.202609210342]
+> Start DBeaver SQL Language Semantic Model [org.jkiss.dbeaver.model.lsm 1.0.82.202609210342]
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.398: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.398: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.399: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.399: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.399: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.413: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.414: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.415: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.415: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.416: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+> Start DBeaver SQLite UI [org.jkiss.dbeaver.ext.sqlite.ui 1.0.157.202609210342]
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.714: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.714: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.714: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.715: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.715: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.833: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.833: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.833: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.833: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-WARNING **: 15:56:38.833: Negative content width -7 (allocation 6, extents 6x7) while allocating gadget (node separator, owner GtkSeparatorToolItem)
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:56:51.700: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:08.931: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:08.989: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.015: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.054: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.083: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.111: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.139: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.179: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.199: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.246: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.284: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:09.309: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:13.871: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:13.906: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.548: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.581: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.613: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.639: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.663: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.689: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.727: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.743: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.774: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.798: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:37.823: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:42.570: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:57:42.605: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.477: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.529: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.545: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.575: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.599: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.624: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.649: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.688: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.704: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.738: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.763: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:01.788: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:06.475: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar
+
+(DBeaver:4585): Gtk-CRITICAL **: 15:58:06.510: gtk_box_gadget_distribute: assertion 'size >= 0' failed in GtkScrollbar

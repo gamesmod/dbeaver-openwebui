@@ -1,0 +1,5 @@
+--- windows (start)
+6291471 Window 6291471   Position: 2,44 (screen: 0)   Geometry: 1018x739  :: DBeaver 
+6291490 Window 6291490   Position: 422,194 (screen: 0)   Geometry: 594x421  :: Product Configuration 
+--- windows (end)
+6291471 Window 6291471   Position: 0,42 (screen: 0)   Geometry: 1440x879  :: DBeaver 26.2.1 - <Магазин (SQLite)> Console 
