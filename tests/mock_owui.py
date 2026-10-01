@@ -1,4 +1,6 @@
-import json, time
+import json, os, time
+DEMO = os.environ.get('MOCK_DEMO') == '1'
+DEMO_ANSWER = os.environ.get('MOCK_DEMO_ANSWER', '')
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 LAST = {}
 TOKEN = "sk-test"
@@ -15,6 +17,12 @@ class H(BaseHTTPRequestHandler):
     def do_GET(self):
         if self.path == "/api/models":
             if not self._auth(): return
+            if DEMO:
+                self._json(200, {"data": [
+                    {"id": "qwen2.5-coder:14b", "name": "Qwen2.5 Coder 14B", "object": "model", "owned_by": "ollama", "info": {"params": {"num_ctx": 32768}}},
+                    {"id": "llama3.1:8b", "name": "Llama 3.1 8B", "object": "model", "owned_by": "ollama", "info": {"params": {"num_ctx": 8192}}},
+                    {"id": "gpt-4o", "name": "GPT-4o", "object": "model", "owned_by": "openai", "context_length": 128000}]})
+                return
             self._json(200, {"data": [
                 {"id": "llama3.1:8b", "name": "Llama 3.1", "object": "model", "owned_by": "ollama", "info": {"params": {"num_ctx": 8192}}},
                 {"id": "gpt-4o", "name": "GPT-4o", "object": "model", "owned_by": "openai"}]})
@@ -61,6 +69,12 @@ class H(BaseHTTPRequestHandler):
         elif model == "ollama-obj-model":
             # arguments as JSON object, no index
             chunk({"tool_calls": [{"id": "c9", "function": {"name": "db_listSchemaNames", "arguments": {"catalogName": ""}}}]}, "tool_calls")
+        elif DEMO:
+            text = open(DEMO_ANSWER, encoding="utf-8").read() if DEMO_ANSWER else "SELECT 1;"
+            for i in range(0, len(text), 12):
+                chunk({"content": text[i:i+12]})
+            chunk({}, "stop")
+            send("data: " + json.dumps({"choices": [], "usage": {"prompt_tokens": 1830, "completion_tokens": 142}}))
         else:
             for part in ["<thi", "nk>Let me ", "think</th", "ink>\n\nSELECT ", "* FROM ", "users;"]:
                 chunk({"content": part})

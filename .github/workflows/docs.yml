@@ -1,0 +1,100 @@
+name: docs
+
+# Скриншоты для README: DBeaver с установленным плагином запускается на виртуальном дисплее,
+# к нему подключается mock Open WebUI, сценарий docs/demo/scenario.sh снимает экраны.
+# Результат коммитится в ветку docs-screenshots (сырые кадры) и, если publish=true, в master.
+on:
+  workflow_dispatch:
+    inputs:
+      dbeaver_version:
+        description: 'Версия DBeaver CE. Пусто — последний релиз.'
+        required: false
+      publish:
+        description: 'Скопировать готовые скриншоты в docs/screenshots ветки master'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install X tools and GTK/WebKit
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb xdotool imagemagick libgtk-3-0t64 libwebkit2gtk-4.1-0 \
+            fonts-dejavu fonts-noto-core >/dev/null
+
+      - name: Resolve DBeaver version
+        id: dbv
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_VERSION: ${{ inputs.dbeaver_version }}
+        run: |
+          V="${INPUT_VERSION:-$(gh release view --repo dbeaver/dbeaver --json tagName -q .tagName)}"
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+
+      - name: Cache DBeaver
+        id: dbeaver-cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/dbeaver
+          key: dbeaver-ce-${{ steps.dbv.outputs.version }}-linux
+
+      - name: Download DBeaver CE ${{ steps.dbv.outputs.version }}
+        if: steps.dbeaver-cache.outputs.cache-hit != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          V: ${{ steps.dbv.outputs.version }}
+        run: |
+          ASSET=$(gh release view "$V" --repo dbeaver/dbeaver --json assets -q '.assets[].name' \
+            | grep -E '^dbeaver-ce-.*linux.*(x86_64|amd64).*\.tar\.gz$' | head -1)
+          gh release download "$V" --repo dbeaver/dbeaver --pattern "$ASSET" --output dbeaver.tgz
+          mkdir -p "$RUNNER_TEMP/unpack"
+          tar xzf dbeaver.tgz -C "$RUNNER_TEMP/unpack"
+          HOME_DIR=$(dirname "$(find "$RUNNER_TEMP/unpack" -maxdepth 3 -type d -name plugins | head -1)")
+          mv "$HOME_DIR" "$RUNNER_TEMP/dbeaver"
+
+      - name: Build and install plugin
+        run: |
+          DBEAVER_HOME="$RUNNER_TEMP/dbeaver" ./scripts/build-offline.sh
+          cp -r "$RUNNER_TEMP/dbeaver" "$RUNNER_TEMP/dbeaver-docs"
+          cd "$RUNNER_TEMP/dbeaver-docs"
+          jre/bin/java -jar plugins/org.eclipse.equinox.launcher_*.jar -nosplash \
+            -application org.eclipse.equinox.p2.director \
+            -repository "jar:file:$(ls "$GITHUB_WORKSPACE"/dist/*-site-*.zip)!/" \
+            -installIU dbeaver.openwebui.ai.feature.feature.group
+
+      - name: Take screenshots
+        run: DBEAVER_HOME="$RUNNER_TEMP/dbeaver-docs" OUT="$RUNNER_TEMP/shots" ./scripts/docs-screenshots.sh
+
+      - name: Push raw screenshots to docs-screenshots branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898+github-actions[bot]@users.noreply.github.com"
+          SHA=$(git rev-parse --short HEAD)
+          rm -rf "$RUNNER_TEMP/branch" && mkdir "$RUNNER_TEMP/branch" && cd "$RUNNER_TEMP/branch"
+          git init -q -b docs-screenshots
+          cp -r "$RUNNER_TEMP/shots/." .
+          git add -A
+          git commit -qm "Скриншоты для master@$SHA (DBeaver CE ${{ steps.dbv.outputs.version }})"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" docs-screenshots
+
+      - name: Publish screenshots to master
+        if: inputs.publish
+        run: |
+          mkdir -p docs/screenshots
+          find "$RUNNER_TEMP/shots" -maxdepth 1 -name '*.png' -exec cp {} docs/screenshots/ \;
+          git add docs/screenshots
+          git diff --cached --quiet && { echo "Без изменений"; exit 0; }
+          git commit -qm "docs: скриншоты (DBeaver CE ${{ steps.dbv.outputs.version }}) [skip ci]"
+          git push -q origin HEAD:master
