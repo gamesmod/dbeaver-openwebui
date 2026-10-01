@@ -26,6 +26,21 @@ public class OpenWebUIMessages extends NLS {
     public static String hide_thinking_tip;
     public static String headers_label;
     public static String headers_tip;
+    public static String meta_group;
+    public static String meta_info;
+    public static String meta_hide_connection;
+    public static String meta_hide_connection_tip;
+    public static String meta_snapshot;
+    public static String meta_snapshot_full;
+    public static String meta_snapshot_names;
+    public static String meta_snapshot_none;
+    public static String meta_snapshot_tip;
+    public static String meta_allow_ddl;
+    public static String meta_allow_ddl_tip;
+    public static String meta_allow_editor;
+    public static String meta_allow_editor_tip;
+    public static String meta_max_chars;
+    public static String meta_max_chars_tip;
 
     static {
         NLS.initializeMessages(BUNDLE_NAME, OpenWebUIMessages.class);

@@ -77,6 +77,26 @@ public class OpenWebUIProperties25 implements AIEngineProperties {
     @SerializedName("openwebui.extraHeaders")
     private String extraHeaders;
 
+    @Nullable
+    @SerializedName("openwebui.meta.hideConnectionInfo")
+    private Boolean metaHideConnectionInfo;
+
+    @Nullable
+    @SerializedName("openwebui.meta.snapshot")
+    private String metaSnapshot;
+
+    @Nullable
+    @SerializedName("openwebui.meta.allowTableDdl")
+    private Boolean metaAllowTableDdl;
+
+    @Nullable
+    @SerializedName("openwebui.meta.allowEditorText")
+    private Boolean metaAllowEditorText;
+
+    @Nullable
+    @SerializedName("openwebui.meta.maxChars")
+    private Integer metaMaxChars;
+
     public OpenWebUIProperties25() {
     }
 
@@ -175,6 +195,53 @@ public class OpenWebUIProperties25 implements AIEngineProperties {
 
     public void setExtraHeaders(@Nullable String extraHeaders) {
         this.extraHeaders = extraHeaders;
+    }
+
+    public boolean isMetaHideConnectionInfo() {
+        return metaHideConnectionInfo != null && metaHideConnectionInfo;
+    }
+
+    public void setMetaHideConnectionInfo(boolean value) {
+        this.metaHideConnectionInfo = value;
+    }
+
+    @NotNull
+    public MetadataFilter.Snapshot getMetaSnapshot() {
+        return MetadataFilter.Snapshot.of(metaSnapshot);
+    }
+
+    public void setMetaSnapshot(@NotNull MetadataFilter.Snapshot value) {
+        this.metaSnapshot = value.name();
+    }
+
+    public boolean isMetaAllowTableDdl() {
+        return metaAllowTableDdl == null || metaAllowTableDdl;
+    }
+
+    public void setMetaAllowTableDdl(boolean value) {
+        this.metaAllowTableDdl = value;
+    }
+
+    public boolean isMetaAllowEditorText() {
+        return metaAllowEditorText == null || metaAllowEditorText;
+    }
+
+    public void setMetaAllowEditorText(boolean value) {
+        this.metaAllowEditorText = value;
+    }
+
+    public int getMetaMaxChars() {
+        return metaMaxChars == null || metaMaxChars < 0 ? 0 : metaMaxChars;
+    }
+
+    public void setMetaMaxChars(int value) {
+        this.metaMaxChars = value;
+    }
+
+    @NotNull
+    public MetadataFilter createMetadataFilter() {
+        return new MetadataFilter(isMetaHideConnectionInfo(), getMetaSnapshot(), isMetaAllowTableDdl(),
+            isMetaAllowEditorText(), getMetaMaxChars());
     }
 
     @NotNull

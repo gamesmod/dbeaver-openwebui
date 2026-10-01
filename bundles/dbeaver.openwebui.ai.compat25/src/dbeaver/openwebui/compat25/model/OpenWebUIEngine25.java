@@ -120,12 +120,14 @@ public class OpenWebUIEngine25 extends BaseCompletionEngine<OpenWebUIProperties2
         }
         ChatDto.ChatRequest chatRequest = new ChatDto.ChatRequest();
         chatRequest.model = model;
-        chatRequest.messages = toMessages(request.getMessages());
+        MetadataFilter filter = properties.createMetadataFilter();
+        chatRequest.messages = toMessages(request.getMessages(), filter);
         if (!MODELS_WITHOUT_TEMPERATURE.contains(model)) {
             chatRequest.temperature = properties.getTemperature();
         }
         if (properties.isFunctionsEnabled() && !request.getFunctions().isEmpty()) {
-            chatRequest.tools = toTools(request.getFunctions());
+            List<ChatDto.Tool> tools = toTools(request.getFunctions(), filter);
+            chatRequest.tools = tools.isEmpty() ? null : tools;
         }
         return chatRequest;
     }
@@ -133,6 +135,11 @@ public class OpenWebUIEngine25 extends BaseCompletionEngine<OpenWebUIProperties2
     /** In DBeaver 25.2 function results are local messages and are not sent to the model. */
     @NotNull
     static List<ChatDto.ChatMessage> toMessages(@NotNull List<AIMessage> messages) {
+        return toMessages(messages, new MetadataFilter(false, MetadataFilter.Snapshot.FULL, true, true, 0));
+    }
+
+    @NotNull
+    static List<ChatDto.ChatMessage> toMessages(@NotNull List<AIMessage> messages, @NotNull MetadataFilter filter) {
         List<ChatDto.ChatMessage> result = new ArrayList<>(messages.size());
         for (AIMessage m : messages) {
             if (m.getRole().isLocal()) {
@@ -145,7 +152,8 @@ public class OpenWebUIEngine25 extends BaseCompletionEngine<OpenWebUIProperties2
                 default -> null;
             };
             if (role != null) {
-                result.add(new ChatDto.ChatMessage(role, m.getContent()));
+                String content = m.getRole() == AIMessageType.SYSTEM ? filter.filterSystem(m.getContent()) : m.getContent();
+                result.add(new ChatDto.ChatMessage(role, content));
             }
         }
         return result;
@@ -153,8 +161,16 @@ public class OpenWebUIEngine25 extends BaseCompletionEngine<OpenWebUIProperties2
 
     @NotNull
     static List<ChatDto.Tool> toTools(@NotNull List<AIFunctionDescriptor> functions) {
+        return toTools(functions, new MetadataFilter(false, MetadataFilter.Snapshot.FULL, true, true, 0));
+    }
+
+    @NotNull
+    static List<ChatDto.Tool> toTools(@NotNull List<AIFunctionDescriptor> functions, @NotNull MetadataFilter filter) {
         List<ChatDto.Tool> tools = new ArrayList<>(functions.size());
         for (AIFunctionDescriptor fd : functions) {
+            if (!filter.isFunctionAllowed(fd.getId())) {
+                continue;
+            }
             JsonObject function = new JsonObject();
             function.addProperty("name", fd.getId());
             if (fd.getDescription() != null && !fd.getDescription().isBlank()) {

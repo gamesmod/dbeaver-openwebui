@@ -48,6 +48,7 @@ public class OpenWebUIConfigurator25 implements AIIObjectPropertyConfigurator<AI
     private Button hideThinkingCheck;
     private Button logCheck;
     private Text headersText;
+    private MetadataSettingsPanel metadataPanel;
 
     /** Mirrors of the widgets: the model list is loaded in a background job. */
     private volatile String baseUrl = OpenWebUIProperties25.DEFAULT_BASE_URL;
@@ -119,6 +120,8 @@ public class OpenWebUIConfigurator25 implements AIIObjectPropertyConfigurator<AI
         headersText.setToolTipText(OpenWebUIMessages.headers_tip);
         headersText.addModifyListener(e -> extraHeaders = headersText.getText());
 
+        metadataPanel = new MetadataSettingsPanel(composite, 3);
+
         timeoutText = UIUtils.createLabelText(composite, "Timeout (s)", String.valueOf(OpenWebUIProperties25.DEFAULT_TIMEOUT));
         timeoutText.setLayoutData(GridDataFactory.fillDefaults().span(2, 1).create());
         timeoutText.addModifyListener(e -> timeoutSeconds = parseInt(timeoutText.getText(), OpenWebUIProperties25.DEFAULT_TIMEOUT));
@@ -148,6 +151,8 @@ public class OpenWebUIConfigurator25 implements AIIObjectPropertyConfigurator<AI
         functionsCheck.setSelection(configuration.isFunctionsEnabled());
         hideThinkingCheck.setSelection(configuration.isHideThinking());
         logCheck.setSelection(configuration.isLoggingEnabled());
+        metadataPanel.load(configuration.isMetaHideConnectionInfo(), configuration.getMetaSnapshot(),
+            configuration.isMetaAllowTableDdl(), configuration.isMetaAllowEditorText(), configuration.getMetaMaxChars());
         modelSelectorField.refreshModelListSilently(true);
     }
 
@@ -167,6 +172,11 @@ public class OpenWebUIConfigurator25 implements AIIObjectPropertyConfigurator<AI
         configuration.setExtraHeaders(headersText.getText());
         configuration.setTimeout(parseInt(timeoutText.getText(), OpenWebUIProperties25.DEFAULT_TIMEOUT));
         configuration.setLoggingEnabled(logCheck.getSelection());
+        configuration.setMetaHideConnectionInfo(metadataPanel.hideConnectionCheck.getSelection());
+        configuration.setMetaSnapshot(metadataPanel.snapshot());
+        configuration.setMetaAllowTableDdl(metadataPanel.allowDdlCheck.getSelection());
+        configuration.setMetaAllowEditorText(metadataPanel.allowEditorCheck.getSelection());
+        configuration.setMetaMaxChars(metadataPanel.maxCharsSpinner.getSelection());
     }
 
     @Override

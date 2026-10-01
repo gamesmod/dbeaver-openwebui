@@ -27,6 +27,11 @@ final class ChatMessageConverter {
 
     @NotNull
     static List<ChatDto.ChatMessage> toChatMessages(@NotNull List<AIMessage> messages) {
+        return toChatMessages(messages, new MetadataFilter(false, MetadataFilter.Snapshot.FULL, true, true, 0));
+    }
+
+    @NotNull
+    static List<ChatDto.ChatMessage> toChatMessages(@NotNull List<AIMessage> messages, @NotNull MetadataFilter filter) {
         List<ChatDto.ChatMessage> result = new ArrayList<>(messages.size() + 4);
         for (AIMessage message : messages) {
             AIMessageType role = message.getRole();
@@ -50,11 +55,16 @@ final class ChatMessageConverter {
                 result.add(assistant);
 
                 if (role == AIMessageType.FUNCTION) {
-                    ChatDto.ChatMessage tool = new ChatDto.ChatMessage("tool", message.getContent());
+                    ChatDto.ChatMessage tool = new ChatDto.ChatMessage("tool",
+                        filter.filterFunctionResult(call.getFunctionName(), message.getContent()));
                     tool.toolCallId = callId;
                     result.add(tool);
                 }
                 continue;
+            }
+            String content = message.getContent();
+            if (role == AIMessageType.SYSTEM) {
+                content = filter.filterSystem(content);
             }
             String mappedRole = switch (role) {
                 case SYSTEM -> "system";
@@ -65,7 +75,7 @@ final class ChatMessageConverter {
                 default -> null;
             };
             if (mappedRole != null) {
-                result.add(new ChatDto.ChatMessage(mappedRole, message.getContent()));
+                result.add(new ChatDto.ChatMessage(mappedRole, content));
             }
         }
         return result;
@@ -73,8 +83,16 @@ final class ChatMessageConverter {
 
     @NotNull
     static List<ChatDto.Tool> toTools(@NotNull List<AIFunctionDescriptor> functions) {
+        return toTools(functions, new MetadataFilter(false, MetadataFilter.Snapshot.FULL, true, true, 0));
+    }
+
+    @NotNull
+    static List<ChatDto.Tool> toTools(@NotNull List<AIFunctionDescriptor> functions, @NotNull MetadataFilter filter) {
         List<ChatDto.Tool> tools = new ArrayList<>(functions.size());
         for (AIFunctionDescriptor fd : functions) {
+            if (!filter.isFunctionAllowed(fd.getFullId())) {
+                continue;
+            }
             JsonObject function = new JsonObject();
             function.addProperty("name", fd.getFullId());
             String description = fd.getAiDescription();

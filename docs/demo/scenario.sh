@@ -84,6 +84,20 @@ xdotool key Escape; sleep 2
 activate DBeaver
 shot 31-main-with-toolbar
 
+# --- контекстное меню SQL-редактора: «Мои промпты»
+activate DBeaver
+xdotool mousemove 700 300 click 3; sleep 2
+shot 32-editor-context
+xdotool key Escape; sleep 1
+
+# --- настройки профиля целиком (группа «Передача метаданных»)
+activate DBeaver
+xdotool mousemove 1412 143 click 1; sleep 5
+wmctrl -r :ACTIVE: -e 0,150,0,1140,900; sleep 3
+xdotool mousemove 700 20; sleep 1
+shot 40-settings-meta
+xdotool key Escape; sleep 2
+
 # --- итоговые картинки
 crop 11-chat-answer chat 1440x870+0+0
 crop 11-chat-answer chat-panel 325x790+1115+85

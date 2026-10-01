@@ -1,0 +1,1 @@
+package org.eclipse.swt.widgets; public class Spinner extends Control { public Spinner(Composite p, int s){} public void setValues(int a,int b,int c,int d,int e,int f){} public void setSelection(int v){} public int getSelection(){return 0;} }

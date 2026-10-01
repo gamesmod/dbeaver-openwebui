@@ -89,6 +89,18 @@ public class Harness25Test {
             public boolean shouldSkipClass(Class<?> c) { return false; } }).create().toJson(p);
         check("token not in json, same keys as 26.x", !json.contains("sk-secret") && json.contains("openwebui.base_url") && json.contains("openwebui.model"), json);
 
+        String sys = "Instructions:\n- SQL\nContext:\n- SQL dialect: Oracle\n- DBeaver connection name: secret-host\n"
+            + "Database snapshot:\n- Datasource schema list: HR\nCREATE TABLE HR.EMP (ID NUMBER);\n";
+        OpenWebUIProperties25 pm = props(base, "sk-test", "llama3.1:8b");
+        pm.setMetaHideConnectionInfo(true); pm.setMetaSnapshot(MetadataFilter.Snapshot.NAMES); pm.setMetaAllowTableDdl(false);
+        AIFunctionDescriptor ddl = new AIFunctionDescriptor("getTableDetails", "DDL", new AIFunctionDescriptor.Parameter[0]);
+        AIEngineRequest mreq = new AIEngineRequest(List.of(new AIMessage(AIMessageType.SYSTEM, sys), new AIMessage(AIMessageType.USER, "q")));
+        mreq.setFunctions(List.of(fd, ddl));
+        try (OpenWebUIEngine25 e = new OpenWebUIEngine25(pm)) { e.requestCompletion(MON, mreq); }
+        String sent = last();
+        check("meta 25: filtered", !sent.contains("secret-host") && !sent.contains("CREATE TABLE") && sent.contains("schema list: HR")
+            && sent.contains("listTableNames") && !sent.contains("getTableDetails"), sent);
+
         System.out.println("\n" + passed + " passed, " + failed + " failed");
         System.exit(failed == 0 ? 0 : 1);
     }

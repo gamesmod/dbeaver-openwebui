@@ -1,0 +1,1 @@
+package org.eclipse.swt.widgets; public class Combo extends Control { public Combo(Composite p, int s){} public void setItems(String... i){} public void select(int i){} public int getSelectionIndex(){return 0;} }

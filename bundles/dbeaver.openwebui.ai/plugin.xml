@@ -60,6 +60,11 @@
         <menuContribution allPopups="false" locationURI="menu:dbeaver.openwebui.prompts.dropdown">
             <dynamic id="dbeaver.openwebui.prompts.items" class="dbeaver.openwebui.prompts.SavedPromptsMenu"/>
         </menuContribution>
+        <menuContribution allPopups="false" locationURI="popup:org.jkiss.dbeaver.ui.editors.sql.SQLEditor.EditorContext?after=sql.additions">
+            <menu id="dbeaver.openwebui.prompts.editorMenu" label="%prompts.menu.label" icon="icons/prompts.svg">
+                <dynamic id="dbeaver.openwebui.prompts.items.editor" class="dbeaver.openwebui.prompts.SavedPromptsMenu"/>
+            </menu>
+        </menuContribution>
         <menuContribution allPopups="false" locationURI="menu:ai.dropdown.menu?after=configuration">
             <menu id="dbeaver.openwebui.prompts.submenu" label="%prompts.menu.label" icon="icons/prompts.svg">
                 <dynamic id="dbeaver.openwebui.prompts.items.main" class="dbeaver.openwebui.prompts.SavedPromptsMenu"/>

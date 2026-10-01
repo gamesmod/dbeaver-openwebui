@@ -186,6 +186,43 @@ public class HarnessTest {
             public boolean shouldSkipClass(Class<?> c) { return false; } }).create().toJson(p1);
         check("token not in profile json", !json.contains("sk-secret") && json.contains("openwebui.base_url"), json);
 
+        // --- ограничение метаданных
+        String sys = "Instructions:\n- Write SQL\n\nContext:\n- SQL dialect: PostgreSQL\n- Server version: PostgreSQL 16.2\n"
+            + "- DBeaver connection name: prod-db.corp.local\n- JDBC driver: PostgreSQL JDBC Driver (42.7)\n"
+            + "- Default schema: public\n- Current date: 2026-10-01\n\nOutput Format:\n- markdown\n"
+            + "Database snapshot:\n- Datasource schema list: public,sales\nCREATE TABLE public.users (id int, email text);\n";
+        MetadataFilter mf = new MetadataFilter(true, MetadataFilter.Snapshot.NAMES, true, true, 0);
+        String fs = mf.filterSystem(sys);
+        check("meta: connection hidden", !fs.contains("prod-db") && !fs.contains("Server version") && !fs.contains("JDBC driver")
+            && fs.contains("SQL dialect: PostgreSQL") && fs.contains("Default schema: public"), fs);
+        check("meta: names only", fs.contains("schema list: public,sales") && !fs.contains("CREATE TABLE"), fs);
+        String none = new MetadataFilter(false, MetadataFilter.Snapshot.NONE, true, true, 0).filterSystem(sys);
+        check("meta: no snapshot", !none.contains("Database snapshot") && !none.contains("schema list") && none.contains("prod-db"), none);
+        String lim = new MetadataFilter(false, MetadataFilter.Snapshot.FULL, true, true, 20).filterSystem(sys);
+        check("meta: snapshot limited", lim.contains("Output Format") && lim.contains("[truncated") && !lim.contains("email text"), lim);
+        check("meta: pass-through", new MetadataFilter(false, MetadataFilter.Snapshot.FULL, true, true, 0).filterSystem(sys).equals(sys), null);
+        MetadataFilter noDdl = new MetadataFilter(false, MetadataFilter.Snapshot.FULL, false, false, 0);
+        check("meta: functions filtered", !noDdl.isFunctionAllowed("db_getTableDetails") && !noDdl.isFunctionAllowed("ui_getCurrentScript")
+            && noDdl.isFunctionAllowed("db_listTableNames"), null);
+        check("meta: old ddl result redacted", noDdl.filterFunctionResult("db_getTableDetails", "CREATE TABLE x").startsWith("This information is not available"), null);
+
+        OpenWebUIProperties pm = props(base, "sk-test", "tool-model");
+        pm.setMetaSnapshot(MetadataFilter.Snapshot.NONE); pm.setMetaHideConnectionInfo(true); pm.setMetaAllowTableDdl(false);
+        AIFunctionDescriptor fdDdl = new AIFunctionDescriptor() {
+            public String getFullId() { return "db_getTableDetails"; } public String getAiDescription() { return "DDL"; }
+            public AIFunctionParameter[] getParameters() { return new AIFunctionParameter[0]; } };
+        AIEngineRequest metaReq = new AIEngineRequest(List.of(new AIMessage(AIMessageType.SYSTEM, sys, null), new AIMessage(AIMessageType.USER, "q", null)));
+        metaReq.setFunctions(List.of(fd, fdDdl));
+        try (OpenWebUIEngine e = new OpenWebUIEngine(pm)) { e.requestCompletion(MON, metaReq); }
+        String sent = last();
+        check("meta: request filtered", !sent.contains("prod-db") && !sent.contains("CREATE TABLE") && !sent.contains("getTableDetails")
+            && sent.contains("db_listTableNames"), sent);
+        OpenWebUIProperties pr = new OpenWebUIProperties(); pr.setMetaSnapshot(MetadataFilter.Snapshot.NAMES); pr.setMetaMaxChars(500);
+        String prJson = new com.google.gson.Gson().toJson(pr);
+        OpenWebUIProperties pr2 = new com.google.gson.Gson().fromJson(prJson, OpenWebUIProperties.class);
+        check("meta: settings roundtrip", pr2.getMetaSnapshot() == MetadataFilter.Snapshot.NAMES && pr2.getMetaMaxChars() == 500
+            && pr2.isMetaAllowTableDdl() && prJson.contains("openwebui.meta.snapshot"), prJson);
+
         System.out.println("\n" + passed + " passed, " + failed + " failed");
         System.exit(failed == 0 ? 0 : 1);
     }

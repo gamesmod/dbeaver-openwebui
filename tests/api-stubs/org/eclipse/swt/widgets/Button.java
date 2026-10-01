@@ -1,1 +1,1 @@
-package org.eclipse.swt.widgets; public class Button extends Control { public boolean getSelection(){return false;} public void setSelection(boolean b){} }
+package org.eclipse.swt.widgets; public class Button extends Control { public Button(){} public Button(Composite p, int s){} public void setText(String t){} public boolean getSelection(){return false;} public void setSelection(boolean b){} }

@@ -46,6 +46,7 @@ public class OpenWebUIConfigurator extends AbstractAIEngineConfigurator<AIEngine
     private Button functionsCheck;
     private Button hideThinkingCheck;
     private Text headersText;
+    private MetadataSettingsPanel metadataPanel;
 
     /** Values are mirrored from widgets, because the model list is loaded in a background job. */
     private volatile String baseUrl = OpenWebUIConstants.DEFAULT_BASE_URL;
@@ -133,6 +134,8 @@ public class OpenWebUIConfigurator extends AbstractAIEngineConfigurator<AIEngine
         });
 
         // --- timeout / logging
+        metadataPanel = new MetadataSettingsPanel(composite, 3);
+
         createAdvancedSettings(composite);
     }
 
@@ -150,6 +153,8 @@ public class OpenWebUIConfigurator extends AbstractAIEngineConfigurator<AIEngine
         streamingCheck.setSelection(configuration.isStreaming());
         functionsCheck.setSelection(configuration.isFunctionsEnabled());
         hideThinkingCheck.setSelection(configuration.isHideThinking());
+        metadataPanel.load(configuration.isMetaHideConnectionInfo(), configuration.getMetaSnapshot(),
+            configuration.isMetaAllowTableDdl(), configuration.isMetaAllowEditorText(), configuration.getMetaMaxChars());
         loadAdvancedSettings(configuration);
 
         modelSelectorField.refreshModelListSilently(true);
@@ -169,6 +174,11 @@ public class OpenWebUIConfigurator extends AbstractAIEngineConfigurator<AIEngine
         configuration.setFunctionsEnabled(functionsCheck.getSelection());
         configuration.setHideThinking(hideThinkingCheck.getSelection());
         configuration.setExtraHeaders(headersText.getText());
+        configuration.setMetaHideConnectionInfo(metadataPanel.hideConnectionCheck.getSelection());
+        configuration.setMetaSnapshot(metadataPanel.snapshot());
+        configuration.setMetaAllowTableDdl(metadataPanel.allowDdlCheck.getSelection());
+        configuration.setMetaAllowEditorText(metadataPanel.allowEditorCheck.getSelection());
+        configuration.setMetaMaxChars(metadataPanel.maxCharsSpinner.getSelection());
         saveAdvancedSettings(configuration);
     }
 

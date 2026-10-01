@@ -167,12 +167,14 @@ public class OpenWebUIEngine extends BaseCompletionEngine<OpenWebUIProperties> {
         }
         ChatDto.ChatRequest chatRequest = new ChatDto.ChatRequest();
         chatRequest.model = model;
-        chatRequest.messages = ChatMessageConverter.toChatMessages(request.getMessages());
+        MetadataFilter filter = properties.createMetadataFilter();
+        chatRequest.messages = ChatMessageConverter.toChatMessages(request.getMessages(), filter);
         if (!MODELS_WITHOUT_TEMPERATURE.contains(model)) {
             chatRequest.temperature = properties.getTemperature();
         }
         if (properties.isFunctionsEnabled() && !request.getFunctions().isEmpty()) {
-            chatRequest.tools = ChatMessageConverter.toTools(request.getFunctions());
+            List<ChatDto.Tool> tools = ChatMessageConverter.toTools(request.getFunctions(), filter);
+            chatRequest.tools = tools.isEmpty() ? null : tools;
         }
         return chatRequest;
     }
