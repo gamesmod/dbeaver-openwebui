@@ -14,15 +14,6 @@ xdotool key alt+w; sleep 2
 shot 04-window-menu
 xdotool key Escape; sleep 1
 
-# --- подключение к БД в чате
-ls "$DBEAVER_HOME/plugins" | grep -i -E "sqlite|drivers" > "$RAW/driver-bundles.txt"; ls "$DBEAVER_HOME" > "$RAW/home.txt"; ls "$DBEAVER_HOME/drivers" -R 2>/dev/null | head -50 >> "$RAW/home.txt"
-xdotool mousemove 1245 140 click 1; sleep 3
-windows conn-select
-shot 05-conn-dropdown
-xdotool key Down; sleep 1; xdotool key Return; sleep 5
-windows conn-selected
-shot 06-conn-selected
-
 # --- AI-чат: вопрос и ответ через Open WebUI
 xdotool mousemove 1280 817 click 1; sleep 1
 xdotool type --delay 30 "Топ-5 клиентов по выручке за последние 30 дней"; sleep 1
@@ -34,7 +25,7 @@ windows after-chat
 # --- кнопка выполнения запроса из ответа
 xdotool mousemove 1337 489; sleep 2
 shot 13-play-hover
-xdotool click 1; sleep 8
+xdotool click 1; sleep 15
 windows after-play
 shot 14-play-result
 for i in 1 2; do

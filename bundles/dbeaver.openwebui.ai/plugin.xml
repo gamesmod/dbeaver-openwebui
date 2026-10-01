@@ -22,4 +22,9 @@
             uiClass="dbeaver.openwebui.ui.OpenWebUIConfigurator"/>
     </extension>
 
+    <!-- Кнопка ▶ под SQL в AI-чате: работает и без выбранного в чате подключения -->
+    <extension point="org.jkiss.dbeaver.workbenchHandler">
+        <workbenchWindowInitializer class="dbeaver.openwebui.ui.ChatExecuteFix" order="10"/>
+    </extension>
+
 </plugin>

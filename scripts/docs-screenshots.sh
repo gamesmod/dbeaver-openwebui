@@ -86,7 +86,7 @@ shot 00-start
 
 # сценарий шагов (дополняется по мере отладки)
 if [ -f "$ROOT/docs/demo/scenario.sh" ]; then
-  source "$ROOT/docs/demo/scenario.sh"
+  ( source "$ROOT/docs/demo/scenario.sh" ) 2>&1 | tee "$RAW/scenario.log"
 fi
 
 windows end | tee -a "$RAW/windows.txt"

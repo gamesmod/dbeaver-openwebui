@@ -13,7 +13,10 @@ fi
 OUT="$ROOT/target/tests"
 rm -rf "$OUT" && mkdir -p "$OUT"
 javac -encoding UTF-8 --release 21 -proc:none -nowarn -cp "$GSON_JAR" -d "$OUT" \
-  $(find "$ROOT/tests/api-stubs" "$ROOT/bundles/dbeaver.openwebui.ai/src" "$ROOT/tests/src" -name '*.java')
+  $(find "$ROOT/tests/api-stubs" "$ROOT/bundles/dbeaver.openwebui.ai/src" "$ROOT/tests/src" -name '*.java' \
+      ! -name 'ChatExecuteFix.java')
+# ChatExecuteFix завязан на SQL-редактор и AI-чат DBeaver: он компилируется в build-offline.sh
+# против настоящих jar и проверяется в workflow docs
 
 PORT=18080
 python3 "$ROOT/tests/mock_owui.py" & PID=$!
