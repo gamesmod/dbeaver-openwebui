@@ -27,11 +27,9 @@ xdotool mousemove 1295 853 click 1; sleep 3
 shot 12-models
 xdotool key Escape; sleep 1
 
-# --- настройки: Window → Preferences
+# --- настройки AI через шестерёнку панели чата
 activate DBeaver
-xdotool key alt+w; sleep 2
-xdotool mousemove 421 389 click 1; sleep 4
-windows prefs
-shot 20-prefs-open
-xdotool type --delay 50 "Engines"; sleep 3
-shot 21-prefs-filter
+xdotool mousemove 1412 143 click 1; sleep 5
+windows settings
+wmctrl -r :ACTIVE: -e 0,150,50,1140,800; sleep 2
+shot 20-settings
