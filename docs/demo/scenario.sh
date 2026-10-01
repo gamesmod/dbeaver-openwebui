@@ -37,8 +37,9 @@ shot 16-execute-final
 
 # --- «Мои промпты» из панели чата: выделенный запрос в редакторе подставляется в ${selection}
 xdotool mousemove 1362 102 click 1; sleep 2
+xdotool mousemove 1200 158; sleep 2
 shot 17-prompts-menu
-xdotool key Down; sleep 0.5; xdotool key Return; sleep 12
+xdotool mousemove 1180 133 click 1; sleep 12
 shot 18-prompt-sent
 
 # --- список моделей с сервера
@@ -90,3 +91,6 @@ crop 12-models models 325x200+1115+670
 cp "$RAW/20-settings-win.png" "$OUT/settings.png"; echo "copy settings"
 crop 21-test-connection test-connection 1142x826+150+50
 crop 23-engines-list new-profile 372x272+540+284
+crop 30-prompts-page prompts 1142x826+150+50
+crop 17-prompts-menu prompts-menu 440x220+1000+85
+crop 16-execute-final execute 1440x870+0+0
