@@ -35,6 +35,12 @@ for i in 1 2; do
 done
 shot 16-execute-final
 
+# --- «Мои промпты» из панели чата: выделенный запрос в редакторе подставляется в ${selection}
+xdotool mousemove 1362 102 click 1; sleep 2
+shot 17-prompts-menu
+xdotool key Down; sleep 0.5; xdotool key Return; sleep 12
+shot 18-prompt-sent
+
 # --- список моделей с сервера
 xdotool mousemove 1295 853 click 1; sleep 3
 shot 12-models

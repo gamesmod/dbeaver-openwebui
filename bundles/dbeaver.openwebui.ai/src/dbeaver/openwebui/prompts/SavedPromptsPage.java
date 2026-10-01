@@ -157,6 +157,15 @@ public class SavedPromptsPage extends PreferencePage implements IWorkbenchPrefer
         return super.performOk();
     }
 
+    @Override
+    protected void performDefaults() {
+        prompts.clear();
+        prompts.addAll(PromptLibrary.defaults());
+        refreshList();
+        select(prompts.isEmpty() ? -1 : 0);
+        super.performDefaults();
+    }
+
     private void addPrompt() {
         prompts.add(new PromptLibrary.SavedPrompt(PromptMessages.new_prompt_name, "", false));
         refreshList();

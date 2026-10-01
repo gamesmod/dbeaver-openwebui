@@ -12,7 +12,8 @@ OUT="${OUT:-$ROOT/docs/screenshots}"
 WS="${WS:-$RUNNER_TEMP/ws}"
 RAW="$OUT/raw"
 mkdir -p "$OUT" "$RAW" "$WS/.metadata/.config"
-cp "$ROOT/docs/demo/ai-configuration.json" "$WS/.metadata/.config/ai-configuration.json"
+AI_CONFIG="${AI_CONFIG:-$ROOT/docs/demo/ai-configuration.json}"
+[ "$AI_CONFIG" != "none" ] && cp "$AI_CONFIG" "$WS/.metadata/.config/ai-configuration.json"
 
 # Демо-база SQLite и подключение к ней в проекте General
 DB="$WS/shop.db"
@@ -87,8 +88,9 @@ windows start | tee "$RAW/windows.txt"
 shot 00-start
 
 # сценарий шагов (дополняется по мере отладки)
-if [ -f "$ROOT/docs/demo/scenario.sh" ]; then
-  ( source "$ROOT/docs/demo/scenario.sh" ) 2>&1 | tee "$RAW/scenario.log"
+SCENARIO="${SCENARIO:-$ROOT/docs/demo/scenario.sh}"
+if [ -f "$SCENARIO" ]; then
+  ( source "$SCENARIO" ) 2>&1 | tee "$RAW/scenario.log"
 fi
 
 windows end | tee -a "$RAW/windows.txt"

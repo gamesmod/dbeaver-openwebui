@@ -98,3 +98,53 @@ jobs:
           git diff --cached --quiet && { echo "Без изменений"; exit 0; }
           git commit -qm "docs: скриншоты (DBeaver CE ${{ steps.dbv.outputs.version }}) [skip ci]"
           git push -q origin HEAD:master
+
+  # DBeaver 25.2.4: совместимый бандл, движок в Window → Preferences → AI
+  screenshots-25:
+    runs-on: ubuntu-24.04
+    env:
+      DBEAVER25_VERSION: 25.2.4
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install X tools and GTK/WebKit
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb xdotool xclip wmctrl openbox imagemagick libgtk-3-0t64 libwebkit2gtk-4.1-0 \
+            fonts-dejavu fonts-noto-core >/dev/null
+
+      - name: Download DBeaver CE
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          ./scripts/get-dbeaver.sh latest "$RUNNER_TEMP/dbeaver"
+          ./scripts/get-dbeaver.sh "$DBEAVER25_VERSION" "$RUNNER_TEMP/dbeaver25"
+
+      - name: Build and install plugin into DBeaver ${{ env.DBEAVER25_VERSION }}
+        run: |
+          DBEAVER_HOME="$RUNNER_TEMP/dbeaver" DBEAVER25_HOME="$RUNNER_TEMP/dbeaver25" ./scripts/build-offline.sh
+          ./scripts/p2.sh "$RUNNER_TEMP/dbeaver25" -repository "jar:file:$(ls "$PWD"/dist/*-site-*.zip)!/" \
+            -installIU dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group
+          grep openwebui "$RUNNER_TEMP/dbeaver25/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"
+
+      - name: Take screenshots
+        run: |
+          DBEAVER_HOME="$RUNNER_TEMP/dbeaver25" OUT="$RUNNER_TEMP/shots" AI_CONFIG=none \
+            SCENARIO="$PWD/docs/demo25/scenario.sh" ./scripts/docs-screenshots.sh
+
+      - name: Push raw screenshots to docs-screenshots-25 branch
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898+github-actions[bot]@users.noreply.github.com"
+          SHA=$(git rev-parse --short HEAD)
+          rm -rf "$RUNNER_TEMP/branch" && mkdir "$RUNNER_TEMP/branch" && cd "$RUNNER_TEMP/branch"
+          git init -q -b docs-screenshots-25
+          cp -r "$RUNNER_TEMP/shots/." .
+          git add -A
+          git commit -qm "Скриншоты DBeaver $DBEAVER25_VERSION для master@$SHA"
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${GITHUB_REPOSITORY}.git" docs-screenshots-25
