@@ -3,12 +3,17 @@ name: build
 on:
   push:
     branches: [master]
-    tags: ['v*']
   pull_request:
+  # Публикация релиза на GitHub (тег v<версия>) — сборка и прикрепление архивов к релизу
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       dbeaver_version:
         description: 'Версия DBeaver CE (например 26.2.1). Пусто — последний релиз.'
+        required: false
+      release_tag:
+        description: 'Прикрепить архивы к уже существующему релизу с этим тегом (например v2.0.0).'
         required: false
 
 permissions:
@@ -93,26 +98,36 @@ jobs:
             -installIU dbeaver.openwebui.ai.feature.feature.group
           grep -q '^dbeaver.openwebui.ai,' configuration/org.eclipse.equinox.simpleconfigurator/bundles.info
 
+      - name: Resolve release tag
+        id: rel
+        env:
+          TAG: ${{ github.event.release.tag_name || inputs.release_tag }}
+        run: echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
       - name: Check tag matches bundle version
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: steps.rel.outputs.tag != ''
+        env:
+          TAG: ${{ steps.rel.outputs.tag }}
         run: |
-          TAG="${GITHUB_REF_NAME#v}"
           BV=$(sed -n 's/^Bundle-Version: \([0-9.]*\)\.qualifier.*/\1/p' bundles/dbeaver.openwebui.ai/META-INF/MANIFEST.MF | tr -d '\r')
-          [ "$TAG" = "$BV" ] || { echo "Тег v$TAG не совпадает с Bundle-Version $BV" >&2; exit 1; }
+          [ "${TAG#v}" = "$BV" ] || { echo "Тег $TAG не совпадает с Bundle-Version $BV" >&2; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:
           name: dbeaver-openwebui-ai
           path: dist/*
 
-      - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*
-          make_latest: true
-          generate_release_notes: true
-          body: |
-            Движок Open WebUI для встроенного AI-ассистента DBeaver.
-            Собрано и проверено установкой через p2 на DBeaver CE ${{ steps.dbv.outputs.version }}.
-            Установка: Help → Install New Software… → Add… → Archive… → `dbeaver-openwebui-ai-site-*.zip`.
+      - name: Attach archives to release
+        if: steps.rel.outputs.tag != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.rel.outputs.tag }}
+          DBV: ${{ steps.dbv.outputs.version }}
+        run: |
+          gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          # Дописать в описание релиза версию DBeaver, на которой собрано, если её там ещё нет
+          BODY=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json body -q .body)
+          if ! grep -q 'Собрано и проверено' <<<"$BODY"; then
+            NOTE="Собрано и проверено установкой через p2 на DBeaver CE ${DBV}. Установка: Help → Install New Software… → Add… → Archive… → \`dbeaver-openwebui-ai-site-*.zip\`."
+            gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --notes "$(printf '%s\n\n%s' "$BODY" "$NOTE")"
+          fi

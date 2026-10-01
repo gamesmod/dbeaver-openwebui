@@ -147,7 +147,10 @@ GitHub Actions на каждый push и pull request:
 4. собирает плагин против настоящих jar DBeaver — это и есть проверка совместимости с его API;
 5. ставит update site через p2 director в копию DBeaver.
 
-По тегу `v<версия>` (должен совпадать с `Bundle-Version`) архивы публикуются в Releases.
+Выпуск версии: на GitHub *Releases → Draft a new release*, тег `v<версия>` (должен совпадать
+с `Bundle-Version`) → *Publish release*. Публикация релиза запускает сборку, и архивы прикрепляются
+к нему автоматически. Пересобрать архивы для уже опубликованного релиза: *Actions → build →
+Run workflow*, в поле *release_tag* указать тег.
 
 ## Структура
 
