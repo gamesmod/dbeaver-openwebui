@@ -46,11 +46,25 @@ jobs:
       - name: Download DBeaver CE ${{ steps.dbv.outputs.version }}
         if: steps.dbeaver-cache.outputs.cache-hit != 'true'
         env:
+          GH_TOKEN: ${{ github.token }}
           V: ${{ steps.dbv.outputs.version }}
         run: |
-          curl -fsSL -o dbeaver.tgz \
-            "https://github.com/dbeaver/dbeaver/releases/download/${V}/dbeaver-ce-${V}-linux.gtk.x86_64.tar.gz"
-          tar xzf dbeaver.tgz -C "$RUNNER_TEMP"
+          # Имя архива ищем по списку файлов релиза, а не собираем вручную
+          ASSET=$(gh release view "$V" --repo dbeaver/dbeaver --json assets -q '.assets[].name' \
+            | grep -E '^dbeaver-ce-.*linux.*(x86_64|amd64).*\.tar\.gz$' | head -1)
+          if [ -z "$ASSET" ]; then
+            echo "В релизе $V нет архива для Linux x86_64. Файлы релиза:" >&2
+            gh release view "$V" --repo dbeaver/dbeaver --json assets -q '.assets[].name' >&2
+            exit 1
+          fi
+          echo "Скачиваю $ASSET"
+          gh release download "$V" --repo dbeaver/dbeaver --pattern "$ASSET" --output dbeaver.tgz
+          mkdir -p "$RUNNER_TEMP/unpack"
+          tar xzf dbeaver.tgz -C "$RUNNER_TEMP/unpack"
+          # Корневой каталог архива — тот, где лежит plugins/
+          HOME_DIR=$(dirname "$(find "$RUNNER_TEMP/unpack" -maxdepth 3 -type d -name plugins | head -1)")
+          mv "$HOME_DIR" "$RUNNER_TEMP/dbeaver"
+          ls "$RUNNER_TEMP/dbeaver"
 
       - name: Check DBeaver AI extension points
         run: |
