@@ -87,8 +87,9 @@ shot 31-main-with-toolbar
 # --- контекстное меню SQL-редактора: «Мои промпты»
 activate DBeaver
 xdotool mousemove 700 300 click 3; sleep 2
+xdotool mousemove 790 372; sleep 2
 shot 32-editor-context
-xdotool key Escape; sleep 1
+xdotool key Escape; sleep 0.5; xdotool key Escape; sleep 1
 
 # --- настройки профиля целиком (группа «Передача метаданных»)
 activate DBeaver
@@ -108,3 +109,5 @@ crop 23-engines-list new-profile 372x272+540+284
 crop 30-prompts-page prompts 1142x826+150+50
 crop 17-prompts-menu prompts-menu 440x220+1000+85
 crop 16-execute-final execute 1440x870+0+0
+crop 32-editor-context editor-prompts 760x220+420+280
+crop 40-settings-meta metadata 945x240+343+585
