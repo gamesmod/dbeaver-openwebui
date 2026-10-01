@@ -9,3 +9,9 @@ activate DBeaver
 shot 02-main
 xdotool key alt+w; sleep 2
 shot 03-window-menu
+xdotool mousemove 421 362 click 1; sleep 5
+wmctrl -r :ACTIVE: -e 0,150,50,1140,800; sleep 2
+xdotool type --delay 80 "AI"; sleep 2
+xdotool key Down; sleep 3
+windows prefs
+shot 04-prefs-ai
