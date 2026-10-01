@@ -15,12 +15,22 @@ cp "$ROOT/docs/demo/ai-configuration.json" "$WS/.metadata/.config/ai-configurati
 export DISPLAY=:99
 Xvfb :99 -screen 0 1440x900x24 >/dev/null 2>&1 &
 sleep 2
+openbox >/dev/null 2>&1 &   # оконный менеджер: без него не работает фокус клавиатуры
+sleep 1
 
 MOCK_DEMO=1 MOCK_DEMO_ANSWER="$ROOT/docs/demo/answer.md" python3 "$ROOT/tests/mock_owui.py" &
 sleep 1
 
 shot() {  # shot <name> — весь экран
   import -window root "$RAW/$1.png"; echo "shot $1"
+}
+activate() {  # activate <заголовок окна> — вывести окно на передний план и дать фокус
+  local w; w=$(xdotool search --onlyvisible --name "$1" 2>/dev/null | tail -1)
+  [ -n "$w" ] && xdotool windowactivate --sync "$w" 2>/dev/null; sleep 0.5; echo "activate $1 -> ${w:-none}"
+}
+shotwin() {  # shotwin <имя> <заголовок> — снимок одного окна (с рамкой)
+  local w; w=$(xdotool search --onlyvisible --name "$2" 2>/dev/null | tail -1)
+  if [ -n "$w" ]; then import -window "$w" -frame "$RAW/$1.png"; echo "shotwin $1"; else shot "$1"; fi
 }
 windows() {
   echo "--- windows ($1)"; for w in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do

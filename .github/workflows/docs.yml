@@ -31,7 +31,7 @@ jobs:
       - name: Install X tools and GTK/WebKit
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb xdotool imagemagick libgtk-3-0t64 libwebkit2gtk-4.1-0 \
+          sudo apt-get install -y -qq xvfb xdotool wmctrl openbox imagemagick libgtk-3-0t64 libwebkit2gtk-4.1-0 \
             fonts-dejavu fonts-noto-core >/dev/null
 
       - name: Resolve DBeaver version
