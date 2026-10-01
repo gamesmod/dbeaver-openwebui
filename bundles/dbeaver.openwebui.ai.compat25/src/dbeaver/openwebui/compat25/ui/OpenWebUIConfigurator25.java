@@ -95,10 +95,7 @@ public class OpenWebUIConfigurator25 implements AIIObjectPropertyConfigurator<AI
             .withModelListSupplier((monitor, forceRefresh) -> fetchModels(monitor))
             .withSelectionListener(SelectionListener.widgetSelectedAdapter(e -> onModelSelected()))
             .build();
-        Button refresh = new Button(composite, SWT.PUSH);
-        refresh.setText("↻");
-        refresh.setToolTipText("Refresh models");
-        refresh.addSelectionListener(SelectionListener.widgetSelectedAdapter(e -> modelSelectorField.refreshModelListSilently(true)));
+        // ModelSelectorField of DBeaver 25.2 has its own refresh button
 
         contextWindowSizeField = ContextWindowSizeField.builder()
             .withParent(composite)

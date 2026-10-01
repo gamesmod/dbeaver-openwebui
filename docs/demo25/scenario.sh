@@ -22,3 +22,8 @@ shot 06-engine-combo
 xdotool mousemove 520 224 click 1; sleep 4
 windows engine-selected
 shot 07-openwebui-selected
+xdotool mousemove 880 283 click 1; sleep 1
+xdotool type --delay 40 "sk-test"; sleep 1
+xdotool mousemove 880 224 click 3 2>/dev/null; sleep 0.5; xdotool key Escape
+xdotool mousemove 880 224 click 1; sleep 0.5; xdotool key ctrl+a; xdotool type --delay 20 "http://openwebui.local:3000/api"; sleep 1
+shot 08-filled
