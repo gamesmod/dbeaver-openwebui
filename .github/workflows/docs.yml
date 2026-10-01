@@ -66,7 +66,7 @@ jobs:
 
       - name: Build and install plugin
         run: |
-          DBEAVER_HOME="$RUNNER_TEMP/dbeaver" ./scripts/build-offline.sh
+          SKIP_COMPAT25=1 DBEAVER_HOME="$RUNNER_TEMP/dbeaver" ./scripts/build-offline.sh
           cp -r "$RUNNER_TEMP/dbeaver" "$RUNNER_TEMP/dbeaver-docs"
           cd "$RUNNER_TEMP/dbeaver-docs"
           jre/bin/java -jar plugins/org.eclipse.equinox.launcher_*.jar -nosplash \

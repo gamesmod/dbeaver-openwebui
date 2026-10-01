@@ -112,7 +112,15 @@ public class ChatExecuteFix implements IWorkbenchWindowInitializer {
                 public Object function(@NotNull Object[] arguments) {
                     if (arguments.length > 0 && arguments[0] != null) {
                         String sql = arguments[0].toString();
-                        UIUtils.asyncExec(() -> execute(chat, sql));
+                        log.debug("Open WebUI: execute requested from AI chat (" + sql.length() + " chars)");
+                        UIUtils.asyncExec(() -> {
+                            try {
+                                execute(chat, sql);
+                            } catch (Throwable e) {
+                                log.error("Open WebUI: error executing query from AI chat", e);
+                                DBWorkbench.getPlatformUI().showError("Execute query", "Error executing query from AI chat", e);
+                            }
+                        });
                     }
                     return null;
                 }
@@ -151,6 +159,7 @@ public class ChatExecuteFix implements IWorkbenchWindowInitializer {
             return;
         }
         DBPDataSourceContainer container = resolveContainer();
+        log.debug("Open WebUI: chat has no connection, using " + (container == null ? "none" : container.getName()));
         if (container == null) {
             return;
         }

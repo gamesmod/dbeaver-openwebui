@@ -3,7 +3,10 @@
    <feature id="dbeaver.openwebui.ai.feature" version="0.0.0">
       <category name="openwebui"/>
    </feature>
+   <feature id="io.dbtools.openwebui.feature" version="0.0.0">
+      <category name="openwebui"/>
+   </feature>
    <category-def name="openwebui" label="Open WebUI integration">
-      <description>Движок Open WebUI для AI-ассистента DBeaver</description>
+      <description>Движок Open WebUI для AI-ассистента DBeaver. Отметьте категорию целиком: так установленная версия 1.x или 2.0.x обновится.</description>
    </category-def>
 </site>

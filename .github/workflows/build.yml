@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       dbeaver_version:
-        description: 'Версия DBeaver CE (например 26.2.1). Пусто — последний релиз.'
+        description: 'Версия DBeaver CE 26.2+ для основного бандла (например 26.2.1). Пусто — последний релиз.'
         required: false
       release_tag:
         description: 'Выпустить релиз: тег v<версия> (= Bundle-Version). Тег и релиз создаются автоматически.'
@@ -17,9 +17,15 @@ on:
 permissions:
   contents: write
 
+env:
+  # Совместимый бандл собирается против этой версии (поддержка 25.2.4–25.2.5)
+  DBEAVER25_VERSION: 25.2.4
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      dbeaver: ${{ steps.dbv.outputs.version }}
     steps:
       - uses: actions/checkout@v4
 
@@ -28,7 +34,6 @@ jobs:
           distribution: temurin
           java-version: '21'
 
-      # Плагин использует AI API DBeaver 26.2+, поэтому по умолчанию собираем против последнего релиза CE.
       - name: Resolve DBeaver version
         id: dbv
         env:
@@ -36,108 +41,130 @@ jobs:
           INPUT_VERSION: ${{ inputs.dbeaver_version }}
         run: |
           V="${INPUT_VERSION:-$(gh release view --repo dbeaver/dbeaver --json tagName -q .tagName)}"
-          echo "DBeaver CE $V"
+          echo "DBeaver CE $V, совместимый бандл: $DBEAVER25_VERSION"
           echo "version=$V" >> "$GITHUB_OUTPUT"
 
       - name: Cache DBeaver
-        id: dbeaver-cache
         uses: actions/cache@v4
         with:
-          path: ${{ runner.temp }}/dbeaver
-          key: dbeaver-ce-${{ steps.dbv.outputs.version }}-linux
+          path: |
+            ${{ runner.temp }}/dbeaver
+            ${{ runner.temp }}/dbeaver25
+          key: dbeaver-ce-${{ steps.dbv.outputs.version }}-${{ env.DBEAVER25_VERSION }}-linux
 
-      - name: Download DBeaver CE ${{ steps.dbv.outputs.version }}
-        if: steps.dbeaver-cache.outputs.cache-hit != 'true'
+      - name: Download DBeaver CE
         env:
           GH_TOKEN: ${{ github.token }}
-          V: ${{ steps.dbv.outputs.version }}
         run: |
-          # Имя архива ищем по списку файлов релиза, а не собираем вручную
-          ASSET=$(gh release view "$V" --repo dbeaver/dbeaver --json assets -q '.assets[].name' \
-            | grep -E '^dbeaver-ce-.*linux.*(x86_64|amd64).*\.tar\.gz$' | head -1)
-          if [ -z "$ASSET" ]; then
-            echo "В релизе $V нет архива для Linux x86_64. Файлы релиза:" >&2
-            gh release view "$V" --repo dbeaver/dbeaver --json assets -q '.assets[].name' >&2
-            exit 1
-          fi
-          echo "Скачиваю $ASSET"
-          gh release download "$V" --repo dbeaver/dbeaver --pattern "$ASSET" --output dbeaver.tgz
-          mkdir -p "$RUNNER_TEMP/unpack"
-          tar xzf dbeaver.tgz -C "$RUNNER_TEMP/unpack"
-          # Корневой каталог архива — тот, где лежит plugins/
-          HOME_DIR=$(dirname "$(find "$RUNNER_TEMP/unpack" -maxdepth 3 -type d -name plugins | head -1)")
-          mv "$HOME_DIR" "$RUNNER_TEMP/dbeaver"
-          ls "$RUNNER_TEMP/dbeaver"
-
-      - name: Check DBeaver AI extension points
-        run: |
-          P="$RUNNER_TEMP/dbeaver/plugins"
-          MODEL_AI=$(ls "$P"/org.jkiss.dbeaver.model.ai_*.jar)
-          UI=$(ls "$P"/org.jkiss.dbeaver.ui_*.jar)
-          unzip -p "$MODEL_AI" plugin.xml | grep -q 'extension-point id="com.dbeaver.ai.engine"'
-          unzip -p "$UI" plugin.xml | grep -q 'extension-point id="org.jkiss.dbeaver.ui.propertyConfigurator"'
-          echo "OK: $(basename "$MODEL_AI"), $(basename "$UI")"
+          ./scripts/get-dbeaver.sh "${{ steps.dbv.outputs.version }}" "$RUNNER_TEMP/dbeaver"
+          ./scripts/get-dbeaver.sh "$DBEAVER25_VERSION" "$RUNNER_TEMP/dbeaver25"
+          ls "$RUNNER_TEMP/dbeaver/plugins" | grep -E 'dbeaver.(model|ui).ai_'
+          ls "$RUNNER_TEMP/dbeaver25/plugins" | grep -E 'dbeaver.(model|ui).ai_'
 
       - name: Tests
         run: DBEAVER_HOME="$RUNNER_TEMP/dbeaver" ./scripts/run-tests.sh
 
-      # Компиляция идёт против настоящих jar DBeaver — это проверка совместимости с его API.
-      - name: Build plugin and update site
-        run: DBEAVER_HOME="$RUNNER_TEMP/dbeaver" ./scripts/build-offline.sh
+      # Компиляция идёт против настоящих jar DBeaver обеих версий — это проверка совместимости с их API.
+      - name: Build plugins and update site
+        run: DBEAVER_HOME="$RUNNER_TEMP/dbeaver" DBEAVER25_HOME="$RUNNER_TEMP/dbeaver25" ./scripts/build-offline.sh
 
-      - name: Check installability with p2
-        run: |
-          cp -r "$RUNNER_TEMP/dbeaver" "$RUNNER_TEMP/dbeaver-check"
-          cd "$RUNNER_TEMP/dbeaver-check"
-          SITE=$(ls "$GITHUB_WORKSPACE"/dist/*-site-*.zip)
-          jre/bin/java -jar plugins/org.eclipse.equinox.launcher_*.jar -nosplash \
-            -application org.eclipse.equinox.p2.director \
-            -repository "jar:file:${SITE}!/" \
-            -installIU dbeaver.openwebui.ai.feature.feature.group
-          grep -q '^dbeaver.openwebui.ai,' configuration/org.eclipse.equinox.simpleconfigurator/bundles.info
+      # Чистая установка через InstallOperation (как мастер Install New Software): на каждой версии DBeaver
+      # должен встать свой бандл.
+      - name: Install check — DBeaver ${{ steps.dbv.outputs.version }}
+        run: ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver" none - "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai
 
-      - name: Resolve release tag
-        id: rel
-        env:
-          TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.release_tag }}
-        run: echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-
-      - name: Check tag matches bundle version
-        if: steps.rel.outputs.tag != ''
-        env:
-          TAG: ${{ steps.rel.outputs.tag }}
-        run: |
-          BV=$(sed -n 's/^Bundle-Version: \([0-9.]*\)\.qualifier.*/\1/p' bundles/dbeaver.openwebui.ai/META-INF/MANIFEST.MF | tr -d '\r')
-          [ "${TAG#v}" = "$BV" ] || { echo "Тег $TAG не совпадает с Bundle-Version $BV" >&2; exit 1; }
+      - name: Install check — DBeaver ${{ env.DBEAVER25_VERSION }}
+        run: ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver25" none - "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai.compat25
 
       - uses: actions/upload-artifact@v4
         with:
           name: dbeaver-openwebui-ai
           path: dist/*
 
-      # В репозитории включены неизменяемые релизы: файлы нельзя добавить после публикации.
-      # Поэтому релиз создаётся здесь сразу с архивами (gh создаёт черновик, загружает файлы и публикует).
-      - name: Publish release
-        if: steps.rel.outputs.tag != ''
+  # Обновление поверх предыдущих версий: 2.0.2 (из релиза) и 1.0.2 (собирается из тега v1.0.2)
+  upgrade:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ${{ runner.temp }}/dbeaver
+            ${{ runner.temp }}/dbeaver25
+          key: dbeaver-ce-${{ needs.build.outputs.dbeaver }}-${{ env.DBEAVER25_VERSION }}-linux
+
+      - name: Download DBeaver CE
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.rel.outputs.tag }}
-          DBV: ${{ steps.dbv.outputs.version }}
         run: |
-          NOTES="Движок Open WebUI для встроенного AI-ассистента DBeaver.
+          ./scripts/get-dbeaver.sh "${{ needs.build.outputs.dbeaver }}" "$RUNNER_TEMP/dbeaver"
+          ./scripts/get-dbeaver.sh "$DBEAVER25_VERSION" "$RUNNER_TEMP/dbeaver25"
 
-          Собрано и проверено установкой через p2 на DBeaver CE ${DBV}.
-          Установка: Help → Install New Software… → Add… → Archive… → \`dbeaver-openwebui-ai-site-*.zip\`."
+      - uses: actions/download-artifact@v4
+        with:
+          name: dbeaver-openwebui-ai
+          path: dist
+
+      - name: Upgrade from 2.0.2
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download v2.0.2 --repo "$GITHUB_REPOSITORY" --pattern '*-site-*.zip' --dir "$RUNNER_TEMP/old202"
+          ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver" "$(ls "$RUNNER_TEMP"/old202/*.zip)" \
+            dbeaver.openwebui.ai.feature.feature.group "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai
+
+      - name: Upgrade from 1.0.2
+        run: |
+          git worktree add "$RUNNER_TEMP/v102" v1.0.2
+          (cd "$RUNNER_TEMP/v102" && DBEAVER_HOME="$RUNNER_TEMP/dbeaver" ./scripts/build-offline.sh)
+          ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver" "$(ls "$RUNNER_TEMP"/v102/dist/*-site-*.zip)" \
+            io.dbtools.openwebui.feature.feature.group "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai
+
+  release:
+    needs: [build, upgrade]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dbeaver-openwebui-ai
+          path: dist
+
+      - name: Check tag matches bundle versions
+        env:
+          TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.release_tag }}
+        run: |
+          for m in bundles/*/META-INF/MANIFEST.MF; do
+            BV=$(sed -n 's/^Bundle-Version: \([0-9.]*\)\.qualifier.*/\1/p' "$m" | tr -d '\r')
+            [ "${TAG#v}" = "$BV" ] || { echo "Тег $TAG не совпадает с Bundle-Version $BV в $m" >&2; exit 1; }
+          done
+
+      # В репозитории включены неизменяемые релизы: файлы нельзя добавить после публикации.
+      # Поэтому релиз создаётся здесь сразу с архивами.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ startsWith(github.ref, 'refs/tags/v') && github.ref_name || inputs.release_tag }}
+          DBV: ${{ needs.build.outputs.dbeaver }}
+        run: |
+          NOTES="Движок Open WebUI для AI-ассистента DBeaver.
+
+          Собрано и проверено установкой на DBeaver CE ${DBV} и ${DBEAVER25_VERSION}, а также обновлением с 2.0.2 и 1.0.2.
+          Установка: Help → Install New Software… → Add… → Archive… → \`dbeaver-openwebui-ai-site-*.zip\`, отметить категорию *Open WebUI integration* целиком."
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            IS_DRAFT=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json isDraft -q .isDraft)
-            if [ "$IS_DRAFT" = "true" ]; then
-              gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
-              gh release edit "$TAG" --draft=false --latest --repo "$GITHUB_REPOSITORY"
-            else
-              echo "::error::Релиз $TAG уже опубликован, а опубликованные релизы неизменяемы — файлы добавить нельзя. Выпустите новую версию." >&2
-              exit 1
-            fi
-          else
-            gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
-              --title "$TAG" --notes "$NOTES" --latest
+            echo "::error::Релиз $TAG уже существует, а опубликованные релизы неизменяемы. Выпустите новую версию." >&2
+            exit 1
           fi
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" \
+            --title "$TAG" --notes "$NOTES" --latest

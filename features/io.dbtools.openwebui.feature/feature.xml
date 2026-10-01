@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="io.dbtools.openwebui.feature"
+      label="Open WebUI for DBeaver: обновление с версии 1.x"
+      version="2.1.0.qualifier"
+      provider-name="gamesmod">
+   <description>
+      Переходная фича с id плагина 1.x (io.dbtools.openwebui). Если установлена версия 1.x, мастер
+      установки обновит её до этой версии: старый плагин удаляется, ставится движок Open WebUI 2.x.
+      Если версии 1.x нет, просто подключает движок.
+   </description>
+   <license url="https://opensource.org/licenses/MIT">MIT License</license>
+   <includes id="dbeaver.openwebui.ai.feature" version="0.0.0"/>
+</feature>

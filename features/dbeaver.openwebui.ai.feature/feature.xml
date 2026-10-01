@@ -2,28 +2,21 @@
 <feature
       id="dbeaver.openwebui.ai.feature"
       label="Open WebUI engine for DBeaver AI assistant"
-      version="2.0.2.qualifier"
+      version="2.1.0.qualifier"
       provider-name="gamesmod">
 
    <description>
-      Движок «Open WebUI (OpenAI-compatible)» для встроенного AI-ассистента DBeaver:
-      AI-чат, генерация SQL и вызов функций через OpenAI Chat Completions API Open WebUI
-      (а также LiteLLM, vLLM, LM Studio, Ollama).
+      Движок «Open WebUI (OpenAI-compatible)» для AI-ассистента DBeaver: AI-чат, генерация SQL
+      и вызов функций через OpenAI Chat Completions API Open WebUI (а также LiteLLM, vLLM, LM Studio, Ollama).
+      Ставится нужный вариант под версию DBeaver: 26.2+ или 25.2.4–25.2.5.
    </description>
 
    <license url="https://opensource.org/licenses/MIT">
       MIT License
    </license>
 
-   <requires>
-      <import plugin="org.jkiss.dbeaver.model"/>
-      <import plugin="org.jkiss.dbeaver.model.ai"/>
-      <import plugin="org.jkiss.dbeaver.ui"/>
-      <import plugin="org.jkiss.dbeaver.ui.ai"/>
-   </requires>
-
-   <plugin
-         id="dbeaver.openwebui.ai"
-         version="0.0.0"
-         unpack="false"/>
+   <!-- Варианты под разные версии AI API DBeaver. Оба опциональны: p2 ставит тот,
+        чьи зависимости (bundle-version org.jkiss.dbeaver.model.ai) удовлетворяет установленный DBeaver. -->
+   <includes id="dbeaver.openwebui.ai.dbeaver26.feature" version="0.0.0" optional="true"/>
+   <includes id="dbeaver.openwebui.ai.dbeaver25.feature" version="0.0.0" optional="true"/>
 </feature>

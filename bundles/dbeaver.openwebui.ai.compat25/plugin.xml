@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+    <!-- Тот же движок "openwebui", что и в основном бандле, но под AI API DBeaver 25.2.4–25.2.5.
+         Бандл разрешается только на этих версиях (см. bundle-version в MANIFEST.MF). -->
+    <extension point="com.dbeaver.ai.engine">
+        <completionEngine
+            id="openwebui"
+            label="Open WebUI (OpenAI-compatible)"
+            class="dbeaver.openwebui.compat25.model.OpenWebUIEngine25"
+            properties="dbeaver.openwebui.compat25.model.OpenWebUIProperties25"
+            supportsFunctions="true"/>
+    </extension>
+
+    <extension point="org.jkiss.dbeaver.ui.propertyConfigurator">
+        <propertyConfigurator
+            class="dbeaver.openwebui.compat25.model.OpenWebUIEngine25"
+            uiClass="dbeaver.openwebui.compat25.ui.OpenWebUIConfigurator25"/>
+    </extension>
+</plugin>

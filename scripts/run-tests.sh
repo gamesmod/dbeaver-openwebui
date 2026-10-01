@@ -26,3 +26,10 @@ for _ in $(seq 1 50); do
   sleep 0.2
 done
 java -cp "$OUT:$GSON_JAR" dbeaver.openwebui.model.HarnessTest
+
+# Совместимый бандл для DBeaver 25.2.4–25.2.5: заглушки из исходников 25.2.4 (tests/api-stubs-25)
+OUT25="$ROOT/target/tests25"
+rm -rf "$OUT25" && mkdir -p "$OUT25"
+javac -encoding UTF-8 --release 21 -proc:none -nowarn -cp "$GSON_JAR" -d "$OUT25" \
+  $(find "$ROOT/tests/api-stubs-25" "$ROOT/bundles/dbeaver.openwebui.ai.compat25/src/dbeaver/openwebui/compat25/model" "$ROOT/tests/src25" -name '*.java')
+java -cp "$OUT25:$GSON_JAR" dbeaver.openwebui.compat25.model.Harness25Test
