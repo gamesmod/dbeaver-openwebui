@@ -123,6 +123,14 @@ public class OpenWebUIConfigurator25 implements AIIObjectPropertyConfigurator<AI
         timeoutText.setLayoutData(GridDataFactory.fillDefaults().span(2, 1).create());
         timeoutText.addModifyListener(e -> timeoutSeconds = parseInt(timeoutText.getText(), OpenWebUIProperties25.DEFAULT_TIMEOUT));
         logCheck = UIUtils.createCheckbox(composite, "Write AI queries to debug log", null, false, 3);
+
+        // DBeaver 25.2 re-lays out only the "Engine Settings" group, which keeps the height of the previous
+        // engine's panel: re-layout the whole page so that all fields are visible.
+        UIUtils.asyncExec(() -> {
+            if (!composite.isDisposed()) {
+                composite.getShell().layout(true, true);
+            }
+        });
     }
 
     @Override
