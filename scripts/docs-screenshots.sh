@@ -14,13 +14,43 @@ RAW="$OUT/raw"
 mkdir -p "$OUT" "$RAW" "$WS/.metadata/.config"
 cp "$ROOT/docs/demo/ai-configuration.json" "$WS/.metadata/.config/ai-configuration.json"
 
+# Демо-база SQLite и подключение к ней в проекте General
+DB="$WS/shop.db"
+python3 "$ROOT/docs/demo/make-db.py" "$DB"
+mkdir -p "$WS/General/.dbeaver"
+cat > "$WS/General/.project" <<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription><name>General</name><comment></comment><projects></projects><buildSpec></buildSpec>
+<natures><nature>org.jkiss.dbeaver.DBeaverNature</nature></natures></projectDescription>
+XML
+cat > "$WS/General/.dbeaver/data-sources.json" <<JSON
+{
+  "folders": {},
+  "connections": {
+    "sqlite-shop": {
+      "provider": "sqlite",
+      "driver": "sqlite_jdbc",
+      "name": "Магазин (SQLite)",
+      "save-password": true,
+      "configuration": {
+        "database": "$DB",
+        "url": "jdbc:sqlite:$DB",
+        "configurationType": "MANUAL",
+        "type": "dev",
+        "auth-model": "native"
+      }
+    }
+  }
+}
+JSON
+
 export DISPLAY=:99
 Xvfb :99 -screen 0 1440x900x24 >/dev/null 2>&1 &
 sleep 2
 openbox >/dev/null 2>&1 &   # оконный менеджер: без него не работает фокус клавиатуры
 sleep 1
 
-MOCK_PORT=3000 MOCK_DEMO=1 MOCK_DEMO_ANSWER="$ROOT/docs/demo/answer.md" python3 "$ROOT/tests/mock_owui.py" &
+MOCK_PORT=3000 MOCK_DEMO=1 MOCK_DEMO_ANSWER="$ROOT/docs/demo/answer-sqlite.md" python3 "$ROOT/tests/mock_owui.py" &
 sleep 1
 
 crop() {  # crop <исходный кадр> <итоговое имя> <геометрия WxH+X+Y> — итоговая картинка для README
