@@ -109,5 +109,5 @@ crop 23-engines-list new-profile 372x272+540+284
 crop 30-prompts-page prompts 1142x826+150+50
 crop 17-prompts-menu prompts-menu 440x220+1000+85
 crop 16-execute-final execute 1440x870+0+0
-crop 32-editor-context editor-prompts 760x220+420+280
+crop 32-editor-context editor-prompts 940x220+420+280
 crop 40-settings-meta metadata 945x240+343+585
