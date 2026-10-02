@@ -38,8 +38,9 @@ jobs:
       - name: Download DBeaver CE for Windows
         run: |
           V="${{ inputs.dbeaver_version }}"
-          ASSET=$(gh release view "$V" --repo dbeaver/dbeaver --json assets -q '.assets[].name' \
-            | grep -E '^dbeaver-ce-.*win32.*x86_64\.zip$' | head -1)
+          gh release view "$V" --repo dbeaver/dbeaver --json assets -q '.assets[].name' | tee assets.txt
+          ASSET=$(grep -iE '^dbeaver-ce-.*win.*(x86_64|amd64|x64).*\.zip$' assets.txt | head -1)
+          [ -n "$ASSET" ] || { echo "::error::нет zip для Windows: $(tr '\n' ' ' < assets.txt)"; exit 1; }
           echo "asset: $ASSET"
           gh release download "$V" --repo dbeaver/dbeaver --pattern "$ASSET" --output dbeaver.zip
           7z x -y -oC:/dbv dbeaver.zip >/dev/null
