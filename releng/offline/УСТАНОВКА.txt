@@ -1,0 +1,66 @@
+Open WebUI (OpenAI-compatible) для AI-ассистента DBeaver CE — офлайн-установка, версия 2.2.0
+=========================================================================================
+
+Подходит для DBeaver CE 26.2.x и 25.2.4–25.2.5 на Windows. Интернет и Eclipse Marketplace не нужны:
+всё, что требуется плагину (Gson, модули AI-ассистента), уже входит в DBeaver.
+
+Состав пакета
+  install.cmd                              — установка одной командой
+  dbeaver-openwebui-ai-site-2.2.0.zip      — архив update site (для установки через меню)
+  plugins\dbeaver.openwebui.ai_*.jar       — модуль для DBeaver 26.2 (для ручной установки)
+  plugins\dbeaver.openwebui.ai.compat25_*.jar — модуль для DBeaver 25.2.4–25.2.5
+
+
+Способ 1. Скрипт (рекомендуется)
+--------------------------------
+1. Закройте DBeaver.
+2. Распакуйте пакет в папку БЕЗ пробелов в пути, например C:\openwebui-offline
+3. Запустите командную строку (если DBeaver лежит в Program Files или в общей папке — от имени
+   администратора) и выполните, указав папку, где лежит dbeaver.exe:
+
+     C:\openwebui-offline\install.cmd "W:\app\dbeaver"
+
+   Скрипт сам удалит старые версии плагина (1.x и 2.x) и поставит 2.2.0.
+   В конце должно быть: [OK] Plugin installed.
+4. Запустите DBeaver.
+
+
+Способ 2. Через меню DBeaver
+----------------------------
+Пункт меню есть и без Marketplace.
+1. Справка → Установить новое ПО… → Добавить… → Архив… → выберите dbeaver-openwebui-ai-site-2.2.0.zip
+2. Отметьте категорию «Open WebUI».
+3. ВАЖНО: снимите галочку «Связаться со всеми сайтами обновлений во время установки для поиска
+   требуемого ПО» (Contact all update sites during install…). Без интернета с ней установка зависает.
+4. Далее → Готово → согласитесь на неподписанное ПО → перезапустите DBeaver.
+
+
+Способ 3. Вручную (если p2 не работает)
+---------------------------------------
+1. Закройте DBeaver.
+2. Скопируйте plugins\dbeaver.openwebui.ai_2.2.0.v202610011600.jar в <папка DBeaver>\plugins\
+3. Откройте <папка DBeaver>\configuration\org.eclipse.equinox.simpleconfigurator\bundles.info
+   - удалите строки, начинающиеся с io.dbtools.openwebui и dbeaver.openwebui (старые версии);
+   - добавьте в конец строку:
+     dbeaver.openwebui.ai,2.2.0.v202610011600,plugins/dbeaver.openwebui.ai_2.2.0.v202610011600.jar,4,false
+4. Запустите DBeaver.
+Папка dropins в DBeaver 25.x/26.x не работает, класть jar туда бесполезно.
+
+
+Проверка
+--------
+Справка → Сведения об установке → «Подключаемые модули» → фильтр openwebui:
+должна быть строка dbeaver.openwebui.ai 2.2.0.
+В настройках AI в списке движков появится «Open WebUI (OpenAI-compatible)».
+
+
+Ошибка «AI engine openwebui not found» / «N/A» в окне чата
+----------------------------------------------------------
+Настройки AI хранятся в профиле пользователя (%APPDATA%\DBeaverData\workspace6\.metadata\.config\
+ai-configuration.json). При перемещаемом профиле Windows они переезжают на другой компьютер вместе
+с выбранным движком openwebui, а сам плагин там не установлен. Отсюда ошибка в настройках и пустой
+чат с надписью N/A. Установите плагин на этом компьютере любым способом выше.
+
+Если после установки чат по-прежнему показывает N/A: Окна → Настройки → Пользовательский интерфейс →
+группа «Web browser» → Web Engine = Microsoft Edge, перезапустить DBeaver. На Windows Server
+2016/2019 для этого нужен Microsoft Edge WebView2 Runtime (автономный установщик x64 от Microsoft).
