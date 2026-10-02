@@ -91,6 +91,11 @@ jobs:
           set +o pipefail
           ls -la "$DBV/configuration"
           for f in "$DBV"/configuration/*.log; do echo "== $f"; head -40 "$f"; done
+          echo "== bundles.info"; grep -i openwebui "$DBV/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info" || true
+          echo "== artifacts in install"; ls -la "$DBV" | grep -i artifacts || true
+          for f in "$DBV"/artifacts.xml; do [ -f "$f" ] && grep -n -i -A3 "openwebui" "$f" | head -30; done
+          echo "== p2 dirs"; find "$DBV/p2" -maxdepth 3 -type d | head -30
+          find "$DBV/p2" -iname "*openwebui*" | head
           echo "== plugins"; ls "$DBV/plugins" | grep -i openwebui || true
           echo "== features"; ls "$DBV/features" | grep -i openwebui || true
 
