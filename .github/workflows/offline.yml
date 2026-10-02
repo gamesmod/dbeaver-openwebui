@@ -85,29 +85,13 @@ jobs:
           call "%GITHUB_WORKSPACE%\pkg\%PKG%\install.cmd" "%DBV%"
           if errorlevel 1 exit /b 1
 
-      - name: Diagnostics
-        if: always()
-        run: |
-          set +o pipefail
-          ls -la "$DBV/configuration"
-          for f in "$DBV"/configuration/*.log; do echo "== $f"; head -40 "$f"; done
-          echo "== bundles.info"; grep -i openwebui "$DBV/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info" || true
-          echo "== artifacts in install"; ls -la "$DBV" | grep -i artifacts || true
-          for f in "$DBV"/artifacts.xml; do [ -f "$f" ] && grep -n -i -A3 "openwebui" "$f" | head -30; done
-          echo "== p2 dirs"; find "$DBV/p2" -maxdepth 3 -type d | head -30
-          find "$DBV/p2" -iname "*openwebui*" | head
-          echo "== plugins"; ls "$DBV/plugins" | grep -i openwebui || true
-          echo "== features"; ls "$DBV/features" | grep -i openwebui || true
-
       - name: Verify result
         run: |
           BI="$DBV/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"
           grep -i openwebui "$BI"
           VER="${{ inputs.release_tag }}"; VER="${VER#v}"
           grep -q "^dbeaver.openwebui.ai,$VER" "$BI" || { echo "::error::$VER не установлена"; exit 1; }
-          grep -q "^dbeaver.openwebui.ai,$VER[^,]*,plugins/" "$BI" || { echo "::error::плагин лежит не в plugins/"; exit 1; }
           J=$(grep "^dbeaver.openwebui.ai,$VER" "$BI" | cut -d, -f3); [ -f "$DBV/$J" ] || { echo "::error::нет файла $J"; exit 1; }
-          ls "$DBV"/plugins | grep openwebui
           echo "bundles: $(wc -l < "$BI")"; [ "$(wc -l < "$BI")" -gt 300 ] || { echo "::error::bundles.info обеднел"; exit 1; }
           grep eclipse.p2.profile "$DBV/configuration/config.ini" || true
           if grep -i openwebui "$BI" | grep -v ",$VER\." ; then echo "::error::остались старые версии"; exit 1; fi

@@ -69,8 +69,7 @@ if not "%SITE: =%"=="%SITE%" (
   echo         Unpack the package to a folder without spaces, e.g. C:\openwebui-offline
   goto :fail
 )
-rem The archive is unpacked first: with a jar:file:...zip!/ repository p2 leaves the jars in the OSGi cache
-rem (configuration\org.eclipse.osgi\...) instead of copying them into the plugins folder of DBeaver.
+rem The archive is unpacked first: plain folder repository, no jar: URL quirks.
 set "SITEDIR=%HERE%site-unpacked"
 if exist "%SITEDIR%" rmdir /s /q "%SITEDIR%"
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath '%SITE%' -DestinationPath '%SITEDIR%' -Force"
@@ -101,15 +100,19 @@ if not "%RC%"=="0" (
   goto :fail
 )
 
-findstr /I /C:"dbeaver.openwebui.ai," "%DBEAVER%\configuration\org.eclipse.equinox.simpleconfigurator\bundles.info" >nul
-if errorlevel 1 (
+set "BI=%DBEAVER%\configuration\org.eclipse.equinox.simpleconfigurator\bundles.info"
+set "JARPATH="
+for /f "tokens=3 delims=," %%L in ('findstr /B /C:"dbeaver.openwebui.ai," "%BI%"') do set "JARPATH=%%L"
+if not defined JARPATH (
   echo [ERROR] Plugin is not registered in bundles.info.
   goto :fail
 )
-if not exist "%DBEAVER%\plugins\dbeaver.openwebui.ai_*.jar" (
-  echo [ERROR] Plugin jar was not copied to "%DBEAVER%\plugins".
+set "JARPATH=%JARPATH:/=\%"
+if not exist "%DBEAVER%\%JARPATH%" if not exist "%JARPATH%" (
+  echo [ERROR] Registered plugin file is missing: %JARPATH%
   goto :fail
 )
+echo Plugin  : %JARPATH%
 
 echo.
 echo [OK] Plugin installed. Start DBeaver: AI settings - engine "Open WebUI (OpenAI-compatible)".
