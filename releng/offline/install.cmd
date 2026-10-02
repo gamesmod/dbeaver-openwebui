@@ -47,7 +47,7 @@ if not exist "%DBEAVER%\configuration\.openwebui-write-test" (
 )
 del "%DBEAVER%\configuration\.openwebui-write-test" >nul 2>&1
 
-rem p2 profile of this DBeaver: plugins go to its own plugins folder, not to the OSGi cache
+rem Install into the p2 profile of this DBeaver (the one it uses for its own updates)
 set "PROFILE=DefaultProfile"
 for /f "tokens=2 delims==" %%P in ('findstr /B /C:"eclipse.p2.profile=" "%DBEAVER%\configuration\config.ini" 2^>nul') do set "PROFILE=%%P"
 set P2ARGS=-destination "%DBEAVER%" -bundlepool "%DBEAVER%" -profile %PROFILE% -p2.os win32 -p2.ws win32 -p2.arch x86_64
