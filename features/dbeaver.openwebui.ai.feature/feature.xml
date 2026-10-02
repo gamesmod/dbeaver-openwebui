@@ -2,7 +2,7 @@
 <feature
       id="dbeaver.openwebui.ai.feature"
       label="Open WebUI engine for DBeaver AI assistant"
-      version="2.2.0.qualifier"
+      version="2.2.1.qualifier"
       provider-name="gamesmod">
 
    <description>

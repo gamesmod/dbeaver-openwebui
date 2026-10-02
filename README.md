@@ -11,6 +11,12 @@
 
 ## Изменения
 
+- **2.2.1**
+  - **Установка без интернета.** Описана установка через *Install New Software* без доступа в сеть
+    (снять галочку «Contact all update sites…»), Marketplace не нужен. В релизе появился
+    `dbeaver-openwebui-ai-offline-<версия>.zip` для Windows: архив, `install.cmd` и инструкция.
+    Пакет проверяется в CI на DBeaver CE для Windows с обновлением с 2.2.0.
+  - В «Устранении проблем» — ошибка `AI engine openwebui not found` и N/A в чате на другом компьютере.
 - **2.2.0**
   - **Ограничение передаваемых метаданных** в настройках движка: скрыть сведения о подключении,
     снимок БД полностью / только имена / не передавать, запрет DDL и текста SQL-редактора, лимит объёма.
@@ -87,6 +93,22 @@ DBeaver **не подхватывает плагины из папки `dropins`
 2. DBeaver → **Help → Install New Software… → Add… → Archive…** → выберите zip.
 3. Отметьте категорию **Open WebUI integration целиком** (обе фичи в ней), **Next → Finish**,
    подтвердите установку неподписанного содержимого, перезапустите DBeaver.
+
+### Без интернета
+
+Ставится тем же мастером, ничего докачивать не нужно: всё, что требуется плагину, уже входит в DBeaver.
+Eclipse Marketplace тоже не нужен, пункт *Install New Software* есть и без него.
+
+1. Перенесите на компьютер `dbeaver-openwebui-ai-site-<версия>.zip`.
+2. **Help → Install New Software… → Add… → Archive…** → выберите zip.
+3. **Внизу окна снимите галочку «Contact all update sites during install to find required software»**
+   («Связаться со всеми сайтами обновлений…»). С ней мастер пытается выйти в интернет и зависает
+   или падает с ошибкой сети.
+4. Категория целиком → **Next → Finish** → подтвердить неподписанное содержимое → перезапуск.
+
+Для Windows в релизе есть `dbeaver-openwebui-ai-offline-<версия>.zip`: тот же архив, `install.cmd`
+(установка одной командой без окон DBeaver, сам удаляет старые версии) и инструкция `УСТАНОВКА.txt`.
+Пример: `install.cmd "C:\Program Files\DBeaver"` (при закрытом DBeaver, с правами на запись в его папку).
 
 **Обновление.** Тот же порядок: архив новой версии, категория целиком. Мастер сообщит, что установленные
 компоненты будут обновлены, и сам заменит старую версию:
@@ -247,7 +269,10 @@ DBeaver не передаёт модели данные из таблиц. Пе�
 
 | Симптом | Причина / решение |
 |---|---|
-| Движка нет в списке после установки | Версия DBeaver ниже 26.2, или DBeaver не перезапущен |
+| Движка нет в списке после установки | Версия DBeaver не поддерживается (25.3–26.1), или DBeaver не перезапущен |
+| `Failed to create engine configurator for openwebui` / `AI engine openwebui not found`, в чате N/A | Профиль ИИ с движком `openwebui` есть, а плагина в этом DBeaver нет. Типично для перемещаемого профиля Windows: настройки в `%APPDATA%\DBeaverData` переезжают на другой компьютер, плагин — нет. Установите плагин на этом компьютере |
+| Установка без интернета зависает или падает с ошибкой сети | Снимите галочку «Contact all update sites during install…» в окне *Install New Software* |
+| В чате N/A, плагин установлен (Windows Server 2016/2019) | DBeaver показывает чат через Internet Explorer. *Window → Preferences → User Interface → Web Engine = Microsoft Edge* и установить Microsoft Edge WebView2 Runtime |
 | `Server returned an HTML page instead of JSON` | URL без `/api`, либо указан адрес веб-интерфейса за другим путём |
 | `HTTP 401: Not authenticated` | Неверный ключ или API-ключи не включены администратором |
 | `HTTP 404/405` | Неверный путь. Для Open WebUI — `/api`, для vLLM — `/v1` |

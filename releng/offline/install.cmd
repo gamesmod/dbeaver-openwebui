@@ -1,11 +1,12 @@
 @echo off
-rem Offline installer of "Open WebUI (OpenAI-compatible)" engine 2.2.0 for DBeaver CE.
+rem Offline installer of "Open WebUI (OpenAI-compatible)" engine for DBeaver CE.
 rem Needs no internet and no Marketplace: uses the p2 director that is part of DBeaver.
 rem Usage:  install.cmd "W:\app\dbeaver"      (folder that contains dbeaver.exe)
 setlocal EnableExtensions
 
 set "HERE=%~dp0"
-set "SITE=%HERE%dbeaver-openwebui-ai-site-2.2.0.zip"
+set "SITE="
+for %%F in ("%HERE%dbeaver-openwebui-ai-site-*.zip") do set "SITE=%%~fF"
 set "DBEAVER=%~1"
 
 if "%DBEAVER%"=="" if exist "%ProgramFiles%\DBeaver\dbeaver.exe" set "DBEAVER=%ProgramFiles%\DBeaver"
@@ -18,6 +19,7 @@ if not exist "%DBEAVER%\dbeaver.exe" (
   echo [ERROR] dbeaver.exe not found in "%DBEAVER%"
   goto :fail
 )
+if not defined SITE set "SITE=%HERE%dbeaver-openwebui-ai-site-*.zip"
 if not exist "%SITE%" (
   echo [ERROR] "%SITE%" not found. Keep install.cmd next to the site zip.
   goto :fail

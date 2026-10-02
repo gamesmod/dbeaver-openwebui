@@ -129,8 +129,84 @@ jobs:
           ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver" "$(ls "$RUNNER_TEMP"/v102/dist/*-site-*.zip)" \
             io.dbtools.openwebui.feature.feature.group "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai
 
+  # Windows без интернета: офлайн-пакет (архив + install.cmd) на настоящем DBeaver CE для Windows.
+  # Сначала ставится 2.2.0 из релиза, затем install.cmd обновляет до собранной версии.
+  windows:
+    needs: build
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dbeaver-openwebui-ai
+          path: dist
+
+      - name: Download DBeaver CE ${{ needs.build.outputs.dbeaver }} for Windows and old plugin
+        run: |
+          V="${{ needs.build.outputs.dbeaver }}"
+          gh release view "$V" --repo dbeaver/dbeaver --json assets -q '.assets[].name' > assets.txt
+          ASSET=$(grep -iE '^dbeaver-ce-.*win.*(x86_64|amd64|x64).*\.zip$' assets.txt | head -1)
+          [ -n "$ASSET" ] || { echo "::error::нет zip для Windows: $(tr '\n' ' ' < assets.txt)"; exit 1; }
+          gh release download "$V" --repo dbeaver/dbeaver --pattern "$ASSET" --output dbeaver.zip
+          7z x -y -oC:/dbv dbeaver.zip >/dev/null
+          D=$(dirname "$(find C:/dbv -maxdepth 2 -name dbeaver.exe | head -1)")
+          echo "DBV=$D" >> "$GITHUB_ENV"
+          gh release download v2.2.0 --repo "$GITHUB_REPOSITORY" --pattern '*-site-*.zip' --dir old
+
+      - name: Install old version 2.2.0
+        shell: cmd
+        run: |
+          for %%F in (%GITHUB_WORKSPACE%\old\*.zip) do set "OLD=%%~fF"
+          set "OLD=%OLD:\=/%"
+          set "DBV=%DBV:/=\%"
+          for %%F in ("%DBV%\plugins\org.eclipse.equinox.launcher_*.jar") do set "L=%%~fF"
+          cd /d "%DBV%"
+          "%DBV%\jre\bin\java.exe" -jar "%L%" -nosplash -application org.eclipse.equinox.p2.director ^
+            -destination "%DBV%" -bundlepool "%DBV%" -profile DefaultProfile -p2.os win32 -p2.ws win32 -p2.arch x86_64 ^
+            -repository "jar:file:/%OLD%!/" ^
+            -installIU dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group
+          if errorlevel 1 exit /b 1
+          findstr /I openwebui "%DBV%\configuration\org.eclipse.equinox.simpleconfigurator\bundles.info"
+
+      - name: Offline package
+        run: |
+          PKG=$(./scripts/make-offline-package.sh dist pkg)
+          echo "PKG=$PKG" >> "$GITHUB_ENV"
+          ls -l pkg
+
+      - name: Upgrade with install.cmd
+        shell: cmd
+        env:
+          OPENWEBUI_NOPAUSE: '1'
+        run: |
+          call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%"
+          if errorlevel 1 exit /b 1
+          call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%"
+          if errorlevel 1 exit /b 1
+
+      - name: Verify result
+        run: |
+          BI="$DBV/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"
+          grep -i openwebui "$BI"
+          FULL=$(basename "$(ls dist/dbeaver-openwebui-ai-site-*.zip)" .zip); FULL=${FULL#dbeaver-openwebui-ai-site-}
+          grep -q "^dbeaver.openwebui.ai,$FULL," "$BI" || { echo "::error::$FULL не установлена"; exit 1; }
+          J=$(grep "^dbeaver.openwebui.ai,$FULL," "$BI" | cut -d, -f3); [ -f "$DBV/$J" ] || { echo "::error::нет файла $J"; exit 1; }
+          [ "$(wc -l < "$BI")" -gt 300 ] || { echo "::error::bundles.info обеднел"; exit 1; }
+          if grep -i openwebui "$BI" | grep -v ",$FULL," ; then echo "::error::остались старые версии"; exit 1; fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dbeaver-openwebui-ai-offline
+          path: pkg/*.zip
+
   release:
-    needs: [build, upgrade]
+    needs: [build, upgrade, windows]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
     steps:
@@ -139,6 +215,11 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: dbeaver-openwebui-ai
+          path: dist
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dbeaver-openwebui-ai-offline
           path: dist
 
       - name: Check tag matches bundle versions
@@ -161,7 +242,9 @@ jobs:
           NOTES="Движок Open WebUI для AI-ассистента DBeaver.
 
           Собрано и проверено установкой на DBeaver CE ${DBV} и ${DBEAVER25_VERSION}, а также обновлением с 2.0.2 и 1.0.2.
-          Установка: Help → Install New Software… → Add… → Archive… → \`dbeaver-openwebui-ai-site-*.zip\`, отметить категорию *Open WebUI integration* целиком."
+          Установка: Help → Install New Software… → Add… → Archive… → \`dbeaver-openwebui-ai-site-*.zip\`, отметить категорию *Open WebUI* целиком.
+          Без интернета: в том же окне снимите галочку *Contact all update sites during install to find required software*. Marketplace не нужен.
+          \`dbeaver-openwebui-ai-offline-*.zip\` — то же для Windows без интернета: архив, install.cmd и инструкция УСТАНОВКА.txt (проверено на DBeaver CE ${DBV} для Windows)."
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "::error::Релиз $TAG уже существует, а опубликованные релизы неизменяемы. Выпустите новую версию." >&2
             exit 1

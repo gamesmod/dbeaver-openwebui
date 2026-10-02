@@ -2,7 +2,7 @@
 <feature
       id="dbeaver.openwebui.ai.dbeaver25.feature"
       label="Open WebUI engine: DBeaver 25.2.4–25.2.5"
-      version="2.2.0.qualifier"
+      version="2.2.1.qualifier"
       provider-name="gamesmod">
    <description>Движок Open WebUI для AI API DBeaver 25.2.4–25.2.5.</description>
    <license url="https://opensource.org/licenses/MIT">MIT License</license>
