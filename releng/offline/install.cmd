@@ -47,12 +47,17 @@ if not exist "%DBEAVER%\configuration\.openwebui-write-test" (
 )
 del "%DBEAVER%\configuration\.openwebui-write-test" >nul 2>&1
 
+rem p2 profile of this DBeaver: plugins go to its own plugins folder, not to the OSGi cache
+set "PROFILE=DefaultProfile"
+for /f "tokens=2 delims==" %%P in ('findstr /B /C:"eclipse.p2.profile=" "%DBEAVER%\configuration\config.ini" 2^>nul') do set "PROFILE=%%P"
+set P2ARGS=-destination "%DBEAVER%" -bundlepool "%DBEAVER%" -profile %PROFILE% -p2.os win32 -p2.ws win32 -p2.arch x86_64
+
 rem Old versions are removed in the same p2 operation (director does not replace them itself).
 rem Installed roots are taken from the p2 profile of this DBeaver.
 set "UNINSTALL="
 set "ROOTS=%TEMP%\openwebui-roots-%RANDOM%.txt"
 pushd "%DBEAVER%"
-"%JAVA%" -jar "%LAUNCHER%" -nosplash -application org.eclipse.equinox.p2.director -listInstalledRoots > "%ROOTS%" 2>nul
+"%JAVA%" -jar "%LAUNCHER%" -nosplash -application org.eclipse.equinox.p2.director %P2ARGS% -listInstalledRoots > "%ROOTS%" 2>nul
 popd
 for /f "tokens=1 delims=/" %%I in ('findstr /I /C:"openwebui" "%ROOTS%"') do call :addUninstall %%I
 del "%ROOTS%" >nul 2>&1
@@ -68,12 +73,13 @@ set "SITEURL=%SITE:\=/%"
 
 echo DBeaver : %DBEAVER%
 echo Site    : %SITE%
+echo Profile : %PROFILE%
 if defined UNINSTALL echo Remove  : %UNINSTALL%
 echo.
 
 pushd "%DBEAVER%"
 "%JAVA%" -Declipse.p2.mirrors=false -jar "%LAUNCHER%" -nosplash -consoleLog ^
-  -application org.eclipse.equinox.p2.director ^
+  -application org.eclipse.equinox.p2.director %P2ARGS% ^
   -repository "jar:file:/%SITEURL%!/" ^
   %UNINSTALL_ARGS% ^
   -installIU dbeaver.openwebui.ai.feature.feature.group

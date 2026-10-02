@@ -54,8 +54,13 @@ jobs:
           for %%F in (%GITHUB_WORKSPACE%\dl\old\*.zip) do set "OLD=%%~fF"
           set "OLD=%OLD:\=/%"
           for %%F in ("%DBV%\plugins\org.eclipse.equinox.launcher_*.jar") do set "L=%%~fF"
+          set "DBV=%DBV:/=\%"
+          set "PROFILE=DefaultProfile"
+          for /f "tokens=2 delims==" %%P in ('findstr /B /C:"eclipse.p2.profile=" "%DBV%\configuration\config.ini"') do set "PROFILE=%%P"
+          echo profile=%PROFILE%
           cd /d "%DBV%"
           "%DBV%\jre\bin\java.exe" -jar "%L%" -nosplash -consoleLog -application org.eclipse.equinox.p2.director ^
+            -destination "%DBV%" -bundlepool "%DBV%" -profile %PROFILE% -p2.os win32 -p2.ws win32 -p2.arch x86_64 ^
             -repository "jar:file:/%OLD%!/" ^
             -installIU dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group
           findstr /I openwebui "%DBV%\configuration\org.eclipse.equinox.simpleconfigurator\bundles.info"
@@ -86,6 +91,10 @@ jobs:
           grep -i openwebui "$BI"
           VER="${{ inputs.release_tag }}"; VER="${VER#v}"
           grep -q "^dbeaver.openwebui.ai,$VER" "$BI" || { echo "::error::$VER не установлена"; exit 1; }
+          grep -q "^dbeaver.openwebui.ai,$VER[^,]*,plugins/" "$BI" || { echo "::error::плагин лежит не в plugins/"; exit 1; }
+          ls "$DBV"/plugins | grep openwebui
+          echo "bundles: $(wc -l < "$BI")"; [ "$(wc -l < "$BI")" -gt 300 ] || { echo "::error::bundles.info обеднел"; exit 1; }
+          grep eclipse.p2.profile "$DBV/configuration/config.ini" || true
           if grep -i openwebui "$BI" | grep -v ",$VER\." ; then echo "::error::остались старые версии"; exit 1; fi
 
       - name: Second run (reinstall over the same version)
