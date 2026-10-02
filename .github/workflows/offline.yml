@@ -85,6 +85,15 @@ jobs:
           call "%GITHUB_WORKSPACE%\pkg\%PKG%\install.cmd" "%DBV%"
           if errorlevel 1 exit /b 1
 
+      - name: Diagnostics
+        if: always()
+        run: |
+          cat "$DBV/configuration/config.ini" || true
+          cat "$DBV/dbeaver.ini" || true
+          find "$DBV" -maxdepth 6 -name "*.profile" -o -maxdepth 6 -name "*openwebui*" | head -40
+          head -5 "$DBV/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"
+          ls "$DBV" "$DBV/configuration"
+
       - name: Verify result
         run: |
           BI="$DBV/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"
