@@ -11,6 +11,7 @@ set "DBEAVER=%~1"
 if "%DBEAVER%"=="" if exist "%ProgramFiles%\DBeaver\dbeaver.exe" set "DBEAVER=%ProgramFiles%\DBeaver"
 if "%DBEAVER%"=="" if exist "%LOCALAPPDATA%\DBeaver\dbeaver.exe" set "DBEAVER=%LOCALAPPDATA%\DBeaver"
 if "%DBEAVER%"=="" set /p "DBEAVER=DBeaver folder (with dbeaver.exe): "
+set "DBEAVER=%DBEAVER:/=\%"
 if "%DBEAVER:~-1%"=="\" set "DBEAVER=%DBEAVER:~0,-1%"
 
 if not exist "%DBEAVER%\dbeaver.exe" (
@@ -46,12 +47,15 @@ if not exist "%DBEAVER%\configuration\.openwebui-write-test" (
 )
 del "%DBEAVER%\configuration\.openwebui-write-test" >nul 2>&1
 
-rem Old versions are removed in the same p2 operation (director does not replace them itself)
+rem Old versions are removed in the same p2 operation (director does not replace them itself).
+rem Installed roots are taken from the p2 profile of this DBeaver.
 set "UNINSTALL="
-if exist "%DBEAVER%\features\io.dbtools.openwebui.feature_*" set "UNINSTALL=io.dbtools.openwebui.feature.feature.group"
-if exist "%DBEAVER%\features\dbeaver.openwebui.ai.feature_*" (
-  if defined UNINSTALL (set "UNINSTALL=%UNINSTALL%,dbeaver.openwebui.ai.feature.feature.group") else set "UNINSTALL=dbeaver.openwebui.ai.feature.feature.group"
-)
+set "ROOTS=%TEMP%\openwebui-roots-%RANDOM%.txt"
+pushd "%DBEAVER%"
+"%JAVA%" -jar "%LAUNCHER%" -nosplash -application org.eclipse.equinox.p2.director -listInstalledRoots > "%ROOTS%" 2>nul
+popd
+for /f "tokens=1 delims=/" %%I in ('findstr /I /C:"openwebui" "%ROOTS%"') do call :addUninstall %%I
+del "%ROOTS%" >nul 2>&1
 set "UNINSTALL_ARGS="
 if defined UNINSTALL set "UNINSTALL_ARGS=-uninstallIU %UNINSTALL%"
 
@@ -90,6 +94,10 @@ if errorlevel 1 (
 echo.
 echo [OK] Plugin installed. Start DBeaver: AI settings - engine "Open WebUI (OpenAI-compatible)".
 if not defined OPENWEBUI_NOPAUSE pause
+exit /b 0
+
+:addUninstall
+if defined UNINSTALL (set "UNINSTALL=%UNINSTALL%,%~1") else set "UNINSTALL=%~1"
 exit /b 0
 
 :fail
