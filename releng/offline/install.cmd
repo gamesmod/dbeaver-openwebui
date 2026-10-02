@@ -69,7 +69,16 @@ if not "%SITE: =%"=="%SITE%" (
   echo         Unpack the package to a folder without spaces, e.g. C:\openwebui-offline
   goto :fail
 )
-set "SITEURL=%SITE:\=/%"
+rem The archive is unpacked first: with a jar:file:...zip!/ repository p2 leaves the jars in the OSGi cache
+rem (configuration\org.eclipse.osgi\...) instead of copying them into the plugins folder of DBeaver.
+set "SITEDIR=%HERE%site-unpacked"
+if exist "%SITEDIR%" rmdir /s /q "%SITEDIR%"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath '%SITE%' -DestinationPath '%SITEDIR%' -Force"
+if not exist "%SITEDIR%\artifacts.xml" if not exist "%SITEDIR%\artifacts.jar" (
+  echo [ERROR] Cannot unpack "%SITE%" to "%SITEDIR%"
+  goto :fail
+)
+set "SITEURL=%SITEDIR:\=/%"
 
 echo DBeaver : %DBEAVER%
 echo Site    : %SITE%
@@ -80,11 +89,12 @@ echo.
 pushd "%DBEAVER%"
 "%JAVA%" -Declipse.p2.mirrors=false -jar "%LAUNCHER%" -nosplash -consoleLog ^
   -application org.eclipse.equinox.p2.director %P2ARGS% ^
-  -repository "jar:file:/%SITEURL%!/" ^
+  -repository "file:/%SITEURL%/" ^
   %UNINSTALL_ARGS% ^
   -installIU dbeaver.openwebui.ai.feature.feature.group
 set "RC=%ERRORLEVEL%"
 popd
+rmdir /s /q "%SITEDIR%" >nul 2>&1
 if not "%RC%"=="0" (
   echo.
   echo [ERROR] p2 director failed, code %RC%. See the messages above.
@@ -94,6 +104,10 @@ if not "%RC%"=="0" (
 findstr /I /C:"dbeaver.openwebui.ai," "%DBEAVER%\configuration\org.eclipse.equinox.simpleconfigurator\bundles.info" >nul
 if errorlevel 1 (
   echo [ERROR] Plugin is not registered in bundles.info.
+  goto :fail
+)
+if not exist "%DBEAVER%\plugins\dbeaver.openwebui.ai_*.jar" (
+  echo [ERROR] Plugin jar was not copied to "%DBEAVER%\plugins".
   goto :fail
 )
 
