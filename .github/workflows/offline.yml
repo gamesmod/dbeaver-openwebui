@@ -88,12 +88,13 @@ jobs:
       - name: Diagnostics
         if: always()
         run: |
-          P="$DBV/p2/org.eclipse.equinox.p2.engine/profileRegistry/DefaultProfile.profile"
-          ls -la "$P"
-          F=$(ls -t "$P"/*.profile* | head -1); echo "latest: $F"
-          (case "$F" in *.gz) gzip -dc "$F";; *) cat "$F";; esac) | grep -o "<property name='[^']*' value='[^']*'/>" | head -20
-          for f in "$DBV"/configuration/*.log; do echo "== $f"; head -60 "$f"; done
-          find / -name "dbeaver.openwebui.ai_2*" 2>/dev/null | head; find "$USERPROFILE" -maxdepth 4 -iname "*eclipse*" 2>/dev/null | head
+          set +o pipefail
+          ls -la "$DBV/configuration"
+          for f in "$DBV"/configuration/*.log; do echo "== $f"; head -40 "$f"; done
+          echo "== find jar"
+          find /c /d -name "dbeaver.openwebui.ai_2*" 2>/dev/null | head -20
+          echo "== plugins"; ls "$DBV/plugins" | grep -i openwebui || true
+          echo "== features"; ls "$DBV/features" | grep -i openwebui || true
 
       - name: Verify result
         run: |
