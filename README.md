@@ -11,6 +11,10 @@
 
 ## Изменения
 
+- **2.2.2**
+  - `install.cmd`: исправлена ложная ошибка «Plugin is not registered in bundles.info» после успешной
+    установки на машинах с переопределённой переменной `ComSpec` (в выводе — `curl: URL rejected`).
+    Проверка в CI теперь идёт с DBeaver в `C:\Program Files\…` (путь с пробелами) и подменённым `ComSpec`.
 - **2.2.1**
   - **Установка без интернета.** Описана установка через *Install New Software* без доступа в сеть
     (снять галочку «Contact all update sites…»), Marketplace не нужен. В релизе появился

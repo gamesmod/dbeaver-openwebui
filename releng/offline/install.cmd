@@ -3,6 +3,11 @@ rem Offline installer of "Open WebUI (OpenAI-compatible)" engine for DBeaver CE.
 rem Needs no internet and no Marketplace: uses the p2 director that is part of DBeaver.
 rem Usage:  install.cmd "W:\app\dbeaver"      (folder that contains dbeaver.exe)
 setlocal EnableExtensions
+rem Child commands (pipes, for /f) are started through %ComSpec%. Some machines have it overridden,
+rem so the script uses the real cmd.exe and avoids child commands where possible (temp files instead).
+set "ComSpec=%SystemRoot%\system32\cmd.exe"
+set "SYS=%SystemRoot%\system32"
+set "TMPF=%TEMP%\openwebui-install-%RANDOM%%RANDOM%"
 
 set "HERE=%~dp0"
 set "SITE="
@@ -25,8 +30,11 @@ if not exist "%SITE%" (
   goto :fail
 )
 
-tasklist /FI "IMAGENAME eq dbeaver.exe" 2>nul | find /I "dbeaver.exe" >nul
-if not errorlevel 1 (
+"%SYS%\tasklist.exe" /FI "IMAGENAME eq dbeaver.exe" /NH > "%TMPF%.tasks" 2>nul
+"%SYS%\find.exe" /I "dbeaver.exe" "%TMPF%.tasks" >nul 2>&1
+set "RUNNING=%ERRORLEVEL%"
+del "%TMPF%.tasks" >nul 2>&1
+if "%RUNNING%"=="0" (
   echo [ERROR] DBeaver is running. Close it and run install.cmd again.
   goto :fail
 )
@@ -51,18 +59,21 @@ del "%DBEAVER%\configuration\.openwebui-write-test" >nul 2>&1
 
 rem Install into the p2 profile of this DBeaver (the one it uses for its own updates)
 set "PROFILE=DefaultProfile"
-for /f "tokens=2 delims==" %%P in ('findstr /B /C:"eclipse.p2.profile=" "%DBEAVER%\configuration\config.ini" 2^>nul') do set "PROFILE=%%P"
+"%SYS%\findstr.exe" /B /C:"eclipse.p2.profile=" "%DBEAVER%\configuration\config.ini" > "%TMPF%.profile" 2>nul
+for /f "usebackq tokens=2 delims==" %%P in ("%TMPF%.profile") do set "PROFILE=%%P"
+del "%TMPF%.profile" >nul 2>&1
 set P2ARGS=-destination "%DBEAVER%" -bundlepool "%DBEAVER%" -profile %PROFILE% -p2.os win32 -p2.ws win32 -p2.arch x86_64
 
 rem Old versions are removed in the same p2 operation (director does not replace them itself).
 rem Installed roots are taken from the p2 profile of this DBeaver.
 set "UNINSTALL="
-set "ROOTS=%TEMP%\openwebui-roots-%RANDOM%.txt"
+set "ROOTS=%TMPF%.roots"
 pushd "%DBEAVER%"
 "%JAVA%" -jar "%LAUNCHER%" -nosplash -application org.eclipse.equinox.p2.director %P2ARGS% -listInstalledRoots > "%ROOTS%" 2>nul
 popd
-for /f "tokens=1 delims=/" %%I in ('findstr /I /C:"openwebui" "%ROOTS%"') do call :addUninstall %%I
-del "%ROOTS%" >nul 2>&1
+"%SYS%\findstr.exe" /I /C:"openwebui" "%ROOTS%" > "%ROOTS%.ours" 2>nul
+for /f "usebackq tokens=1 delims=/" %%I in ("%ROOTS%.ours") do call :addUninstall %%I
+del "%ROOTS%" "%ROOTS%.ours" >nul 2>&1
 set "UNINSTALL_ARGS="
 if defined UNINSTALL set "UNINSTALL_ARGS=-uninstallIU %UNINSTALL%"
 
@@ -74,7 +85,7 @@ if not "%SITE: =%"=="%SITE%" (
 rem The archive is unpacked first: plain folder repository, no jar: URL quirks.
 set "SITEDIR=%HERE%site-unpacked"
 if exist "%SITEDIR%" rmdir /s /q "%SITEDIR%"
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath '%SITE%' -DestinationPath '%SITEDIR%' -Force"
+"%SYS%\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "Expand-Archive -LiteralPath '%SITE%' -DestinationPath '%SITEDIR%' -Force"
 if not exist "%SITEDIR%\artifacts.xml" if not exist "%SITEDIR%\artifacts.jar" (
   echo [ERROR] Cannot unpack "%SITE%" to "%SITEDIR%"
   goto :fail
@@ -104,7 +115,9 @@ if not "%RC%"=="0" (
 
 set "BI=%DBEAVER%\configuration\org.eclipse.equinox.simpleconfigurator\bundles.info"
 set "JARPATH="
-for /f "tokens=3 delims=," %%L in ('findstr /B /C:"dbeaver.openwebui.ai," "%BI%"') do set "JARPATH=%%L"
+"%SYS%\findstr.exe" /B /C:"dbeaver.openwebui.ai," "%BI%" > "%TMPF%.bi" 2>nul
+for /f "usebackq tokens=3 delims=," %%L in ("%TMPF%.bi") do set "JARPATH=%%L"
+del "%TMPF%.bi" >nul 2>&1
 if not defined JARPATH (
   echo [ERROR] Plugin is not registered in bundles.info.
   goto :fail

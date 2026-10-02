@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Open WebUI engine for DBeaver AI assistant (DBeaver 25.2)
 Bundle-Vendor: gamesmod
 Bundle-SymbolicName: dbeaver.openwebui.ai.compat25;singleton:=true
-Bundle-Version: 2.2.1.qualifier
+Bundle-Version: 2.2.2.qualifier
 Bundle-RequiredExecutionEnvironment: JavaSE-21
 Bundle-ActivationPolicy: lazy
 Automatic-Module-Name: dbeaver.openwebui.ai.compat25

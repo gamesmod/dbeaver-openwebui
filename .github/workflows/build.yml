@@ -156,7 +156,9 @@ jobs:
           gh release download "$V" --repo dbeaver/dbeaver --pattern "$ASSET" --output dbeaver.zip
           7z x -y -oC:/dbv dbeaver.zip >/dev/null
           D=$(dirname "$(find C:/dbv -maxdepth 2 -name dbeaver.exe | head -1)")
-          echo "DBV=$D" >> "$GITHUB_ENV"
+          # путь с пробелами, как в Program Files
+          mkdir -p "C:/Program Files/dbeaver test" && mv "$D" "C:/Program Files/dbeaver test/dbeaver-ce"
+          echo "DBV=C:/Program Files/dbeaver test/dbeaver-ce" >> "$GITHUB_ENV"
           gh release download v2.2.0 --repo "$GITHUB_REPOSITORY" --pattern '*-site-*.zip' --dir old
 
       - name: Install old version 2.2.0
@@ -180,10 +182,12 @@ jobs:
           echo "PKG=$PKG" >> "$GITHUB_ENV"
           ls -l pkg
 
+      # ComSpec подменён на curl: так было на машине пользователя (for /f и конвейеры запускали curl)
       - name: Upgrade with install.cmd
         shell: cmd
         env:
           OPENWEBUI_NOPAUSE: '1'
+          ComSpec: C:\Windows\System32\curl.exe
         run: |
           call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%"
           if errorlevel 1 exit /b 1
