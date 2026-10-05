@@ -23,7 +23,7 @@ export WEBKIT_DISABLE_SANDBOX_THIS_IS_DANGEROUS=1 WEBKIT_DISABLE_COMPOSITING_MOD
 run_phase() {
   local phase="$1"
   echo "==> Фаза $phase"
-  "$DBEAVER_HOME/dbeaver" -nosplash -data "$WS" -vmargs -Dowui.uitest.phase="$phase" -Dowui.uitest.out="$OUT/result" \
+  "$DBEAVER_HOME/dbeaver" -nosplash -data "$WS" -vmargs -Dproduct.config.disable=true -Dowui.uitest.phase="$phase" -Dowui.uitest.out="$OUT/result" \
     > "$OUT/phase$phase.log" 2>&1 &
   local pid=$!
   # Мастер первого запуска (DBeaver 26.2.2+) и прочие стартовые окна закрываются Enter/Escape
