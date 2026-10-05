@@ -127,7 +127,6 @@ public class UiTest implements IWorkbenchWindowInitializer {
         ui(() -> chat.submitPrompt("count orders"));
         boolean placeholder = waitFor(15, () -> lastAssistantStartsWith(c2, "⏳") && !ui(chat::isBusy));
         check("detached: placeholder and free chat", placeholder, dump(c2));
-        shot("async-placeholder");
         int placeholderIndex = c2.getMessages().size() - 1;
         boolean replaced = waitFor(60, () -> {
             List<AIChatMessage> m = c2.getMessages();
@@ -160,11 +159,19 @@ public class UiTest implements IWorkbenchWindowInitializer {
         check("chats mirrored to Open WebUI", chats.size() >= 2, chats.keySet());
 
         // 4. a detached request left unfinished: DBeaver is killed now
+        ui(() -> {
+            var page = org.eclipse.ui.PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+            var ref = page.findViewReference(org.jkiss.dbeaver.ui.IActionConstants.CHAT_VIEW_ID);
+            if (ref != null) {
+                page.setPartState(ref, org.eclipse.ui.IWorkbenchPage.STATE_MAXIMIZED);
+            }
+        });
         ui(chat::createNewConversation);
         AIChatConversation c3 = ui(chat::getActiveConversation);
         ui(() -> chat.submitPrompt("please answer slowly"));
         boolean ph3 = waitFor(15, () -> lastAssistantStartsWith(c3, "⏳"));
         check("unfinished request placeholder", ph3, dump(c3));
+        shot("async-placeholder");
         waitFor(5, () -> read(dir.resolve(c3.getId() + ".json")).contains("⏳"));
         results.put("c3", c3.getId().toString());
     }
