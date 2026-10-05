@@ -385,7 +385,8 @@ jobs:
           NOTES="Движок Open WebUI для AI-ассистента DBeaver.
 
           Собрано и проверено установкой на DBeaver CE ${DBV} и ${DBEAVER25_VERSION}, а также обновлением с 2.0.2 и 1.0.2.
-          Установка: Help → Install New Software… → Add… → Archive… → \`dbeaver-openwebui-ai-site-*.zip\`, отметить категорию *Open WebUI* целиком.
+          Установка: Help → Install New Software… → Add… → Archive… → \`dbeaver-openwebui-ai-site-*.zip\`, отметить категорию *Open WebUI integration* целиком.
+          Надстройка «Фоновые чаты» (DBeaver 26.2+): категория *Open WebUI: add-ons* — запросы задачами на сервере Open WebUI (проверено на Open WebUI 0.6.43–0.11.4), режим «не ждать ответа», сохранение AI-чатов между перезапусками и в Open WebUI.
           Без интернета: в том же окне снимите галочку *Contact all update sites during install to find required software*. Marketplace не нужен.
           \`dbeaver-openwebui-ai-offline-*.zip\` — то же для Windows без интернета: архив, install.cmd и инструкция УСТАНОВКА.txt (проверено на DBeaver CE ${DBV} для Windows)."
           if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
