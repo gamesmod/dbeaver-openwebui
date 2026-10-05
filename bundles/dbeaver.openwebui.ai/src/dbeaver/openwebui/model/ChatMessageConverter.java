@@ -20,7 +20,7 @@ import java.util.Map;
 /**
  * Converts DBeaver AI chat history and function descriptors into Chat Completions payload.
  */
-final class ChatMessageConverter {
+public final class ChatMessageConverter {
 
     private ChatMessageConverter() {
     }
@@ -31,7 +31,7 @@ final class ChatMessageConverter {
     }
 
     @NotNull
-    static List<ChatDto.ChatMessage> toChatMessages(@NotNull List<AIMessage> messages, @NotNull MetadataFilter filter) {
+    public static List<ChatDto.ChatMessage> toChatMessages(@NotNull List<AIMessage> messages, @NotNull MetadataFilter filter) {
         List<ChatDto.ChatMessage> result = new ArrayList<>(messages.size() + 4);
         for (AIMessage message : messages) {
             AIMessageType role = message.getRole();

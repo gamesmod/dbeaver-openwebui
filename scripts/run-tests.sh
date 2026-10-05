@@ -27,6 +27,13 @@ for _ in $(seq 1 50); do
 done
 java -cp "$OUT:$GSON_JAR" dbeaver.openwebui.model.HarnessTest
 
+# Надстройка «фоновые чаты»: ядро (без UI DBeaver) против того же mock-сервера
+OUTA="$ROOT/target/tests-async"
+rm -rf "$OUTA" && mkdir -p "$OUTA"
+javac -encoding UTF-8 --release 21 -proc:none -nowarn -cp "$GSON_JAR" -d "$OUTA" \
+  $(find "$ROOT/tests/api-stubs" "$ROOT/bundles/dbeaver.openwebui.ai.async/src/dbeaver/openwebui/async/core" "$ROOT/tests/src-async" -name '*.java')
+java -cp "$OUTA:$GSON_JAR" dbeaver.openwebui.async.core.AsyncHarnessTest
+
 # Совместимый бандл для DBeaver 25.2.4–25.2.5: заглушки из исходников 25.2.4 (tests/api-stubs-25)
 OUT25="$ROOT/target/tests25"
 rm -rf "$OUT25" && mkdir -p "$OUT25"

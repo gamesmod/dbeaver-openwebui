@@ -1,7 +1,8 @@
 @echo off
 rem Offline installer of "Open WebUI (OpenAI-compatible)" engine for DBeaver CE.
 rem Needs no internet and no Marketplace: uses the p2 director that is part of DBeaver.
-rem Usage:  install.cmd "W:\app\dbeaver"      (folder that contains dbeaver.exe)
+rem Usage:  install.cmd "W:\app\dbeaver" [async]   (folder that contains dbeaver.exe;
+rem         "async" also installs the background chats add-on, DBeaver 26.2+)
 setlocal EnableExtensions
 rem Child commands (pipes, for /f) are started through %ComSpec%. Some machines have it overridden,
 rem so the script uses the real cmd.exe and avoids child commands where possible (temp files instead).
@@ -13,6 +14,9 @@ set "HERE=%~dp0"
 set "SITE="
 for %%F in ("%HERE%dbeaver-openwebui-ai-site-*.zip") do set "SITE=%%~fF"
 set "DBEAVER=%~1"
+set "INSTALL_IUS=dbeaver.openwebui.ai.feature.feature.group"
+set "KEEP_ASYNC="
+if /i "%~2"=="async" set "INSTALL_IUS=%INSTALL_IUS%,dbeaver.openwebui.ai.async.feature.feature.group"
 
 if "%DBEAVER%"=="" if exist "%ProgramFiles%\DBeaver\dbeaver.exe" set "DBEAVER=%ProgramFiles%\DBeaver"
 if "%DBEAVER%"=="" if exist "%LOCALAPPDATA%\DBeaver\dbeaver.exe" set "DBEAVER=%LOCALAPPDATA%\DBeaver"
@@ -74,6 +78,7 @@ popd
 "%SYS%\findstr.exe" /I /C:"openwebui" "%ROOTS%" > "%ROOTS%.ours" 2>nul
 for /f "usebackq tokens=1 delims=/" %%I in ("%ROOTS%.ours") do call :addUninstall %%I
 del "%ROOTS%" "%ROOTS%.ours" >nul 2>&1
+if defined KEEP_ASYNC if /i not "%~2"=="async" set "INSTALL_IUS=%INSTALL_IUS%,dbeaver.openwebui.ai.async.feature.feature.group"
 set "UNINSTALL_ARGS="
 if defined UNINSTALL set "UNINSTALL_ARGS=-uninstallIU %UNINSTALL%"
 
@@ -103,7 +108,7 @@ pushd "%DBEAVER%"
   -application org.eclipse.equinox.p2.director %P2ARGS% ^
   -repository "file:/%SITEURL%/" ^
   %UNINSTALL_ARGS% ^
-  -installIU dbeaver.openwebui.ai.feature.feature.group
+  -installIU %INSTALL_IUS%
 set "RC=%ERRORLEVEL%"
 popd
 rmdir /s /q "%SITEDIR%" >nul 2>&1
@@ -136,6 +141,8 @@ exit /b 0
 
 :addUninstall
 if defined UNINSTALL (set "UNINSTALL=%UNINSTALL%,%~1") else set "UNINSTALL=%~1"
+rem An installed add-on is kept on update
+if /i "%~1"=="dbeaver.openwebui.ai.async.feature.feature.group" set "KEEP_ASYNC=1"
 exit /b 0
 
 :fail

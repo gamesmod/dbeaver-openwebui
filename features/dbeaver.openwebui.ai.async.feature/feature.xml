@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feature
+      id="dbeaver.openwebui.ai.async.feature"
+      label="Open WebUI: background chats (add-on, DBeaver 26.2+)"
+      version="2.3.0.qualifier"
+      provider-name="gamesmod">
+
+   <description>
+      Надстройка к движку Open WebUI. Запросы выполняются фоновыми задачами на сервере Open WebUI:
+      генерация продолжается без DBeaver, ответ доставляется в чат позже (в том числе после перезапуска).
+      Режим «не ждать ответа» сразу освобождает чат. AI-чаты DBeaver сохраняются между перезапусками
+      и дублируются чатами в Open WebUI. Только для DBeaver 26.2+.
+   </description>
+
+   <license url="https://opensource.org/licenses/MIT">
+      MIT License
+   </license>
+
+   <requires>
+      <import feature="dbeaver.openwebui.ai.dbeaver26.feature" version="2.3.0" match="greaterOrEqual"/>
+   </requires>
+
+   <plugin id="dbeaver.openwebui.ai.async" version="0.0.0" unpack="false"/>
+</feature>

@@ -2,7 +2,7 @@
 <feature
       id="io.dbtools.openwebui.feature"
       label="Open WebUI for DBeaver: обновление с версии 1.x"
-      version="2.2.2.qualifier"
+      version="2.3.0.qualifier"
       provider-name="gamesmod">
    <description>
       Переходная фича с id плагина 1.x (io.dbtools.openwebui). Если установлена версия 1.x, мастер

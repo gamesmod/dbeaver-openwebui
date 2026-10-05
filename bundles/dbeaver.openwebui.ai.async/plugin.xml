@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.4"?>
+<plugin>
+
+    <!-- Open WebUI engine with background requests: replaces the engine of the base plugin while installed.
+         The base engine declares fallbacks="openwebui-async", so profiles keep working after uninstall. -->
+    <extension point="com.dbeaver.ai.engine">
+        <completionEngine
+            id="openwebui-async"
+            replaces="openwebui"
+            label="Open WebUI (OpenAI-compatible)"
+            icon="icons/openwebui.svg"
+            class="dbeaver.openwebui.async.AsyncOpenWebUIEngine"
+            properties="dbeaver.openwebui.model.OpenWebUIProperties"
+            promoted="true"
+            supportsFunctions="true"
+            providesMetadata="false"/>
+    </extension>
+
+    <!-- The same settings panel as the base engine (lookup is by exact engine class name) -->
+    <extension point="org.jkiss.dbeaver.ui.propertyConfigurator">
+        <propertyConfigurator
+            class="dbeaver.openwebui.async.AsyncOpenWebUIEngine"
+            uiClass="dbeaver.openwebui.ui.OpenWebUIConfigurator"/>
+    </extension>
+
+    <!-- AI assistant with persistent chats; priority above the built-in one (1) -->
+    <extension point="com.dbeaver.ai.assistant">
+        <assistant id="openwebui-async-assistant" priority="10"
+            class="dbeaver.openwebui.async.AsyncAssistant"
+            sqlFormatter="org.jkiss.dbeaver.model.ai.impl.SimpleSqlFormatterImpl"/>
+    </extension>
+
+    <extension point="org.eclipse.ui.preferencePages">
+        <page id="dbeaver.openwebui.preferences.async"
+              category="org.jkiss.dbeaver.preferences.ai"
+              class="dbeaver.openwebui.async.AsyncPreferencePage"
+              name="%async.page.name"/>
+    </extension>
+
+    <!-- Delivery of answers generated while DBeaver was closed -->
+    <extension point="org.jkiss.dbeaver.workbenchHandler">
+        <workbenchWindowInitializer class="dbeaver.openwebui.async.AsyncStartup" order="20"/>
+    </extension>
+
+</plugin>

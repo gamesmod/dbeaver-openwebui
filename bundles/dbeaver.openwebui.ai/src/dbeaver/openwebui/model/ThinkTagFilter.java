@@ -12,7 +12,7 @@ import org.jkiss.code.NotNull;
  * Works on arbitrary chunk boundaries: a tag split between two chunks is still recognized.
  * Not thread-safe; one instance per response.
  */
-final class ThinkTagFilter {
+public final class ThinkTagFilter {
 
     private static final String[] OPEN_TAGS = {"<think>", "<thinking>"};
     private static final String[] CLOSE_TAGS = {"</think>", "</thinking>"};
@@ -109,7 +109,7 @@ final class ThinkTagFilter {
 
     /** Non-streaming helper. */
     @NotNull
-    static String strip(@NotNull String text) {
+    public static String strip(@NotNull String text) {
         ThinkTagFilter f = new ThinkTagFilter();
         return f.accept(text) + f.flush();
     }

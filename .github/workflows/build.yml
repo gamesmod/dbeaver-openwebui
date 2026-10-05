@@ -73,6 +73,12 @@ jobs:
       - name: Install check — DBeaver ${{ steps.dbv.outputs.version }}
         run: ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver" none - "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai
 
+      - name: Install check — background chats add-on, DBeaver ${{ steps.dbv.outputs.version }}
+        env:
+          INSTALL_IUS: dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group,dbeaver.openwebui.ai.async.feature.feature.group
+          EXPECT_ALSO: dbeaver.openwebui.ai.async
+        run: ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver" none - "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai
+
       - name: Install check — DBeaver ${{ env.DBEAVER25_VERSION }}
         run: ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver25" none - "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai.compat25
 
@@ -189,8 +195,9 @@ jobs:
           OPENWEBUI_NOPAUSE: '1'
           ComSpec: C:\Windows\System32\curl.exe
         run: |
-          call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%"
+          call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%" async
           if errorlevel 1 exit /b 1
+          rem второй запуск без ключа: надстройка должна сохраниться
           call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%"
           if errorlevel 1 exit /b 1
 
@@ -203,14 +210,146 @@ jobs:
           J=$(grep "^dbeaver.openwebui.ai,$FULL," "$BI" | cut -d, -f3); [ -f "$DBV/$J" ] || { echo "::error::нет файла $J"; exit 1; }
           [ "$(wc -l < "$BI")" -gt 300 ] || { echo "::error::bundles.info обеднел"; exit 1; }
           if grep -i openwebui "$BI" | grep -v ",$FULL," ; then echo "::error::остались старые версии"; exit 1; fi
+          grep -q "^dbeaver.openwebui.ai.async,$FULL," "$BI" || { echo "::error::надстройка не установлена или удалена при повторном запуске"; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:
           name: dbeaver-openwebui-ai-offline
           path: pkg/*.zip
 
+  # Сквозная проверка надстройки в настоящем DBeaver: ожидание ответа, режим «не ждать», сохранение чатов,
+  # доставка ответа после перезапуска (tests/async-uitest + scripts/ui-async-test.sh)
+  ui-async:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Install X tools and GTK/WebKit
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb xdotool openbox imagemagick libgtk-3-0t64 libwebkit2gtk-4.1-0 fonts-dejavu >/dev/null
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ${{ runner.temp }}/dbeaver
+            ${{ runner.temp }}/dbeaver25
+          key: dbeaver-ce-${{ needs.build.outputs.dbeaver }}-${{ env.DBEAVER25_VERSION }}-linux
+
+      - name: Download DBeaver CE
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./scripts/get-dbeaver.sh "${{ needs.build.outputs.dbeaver }}" "$RUNNER_TEMP/dbeaver"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: dbeaver-openwebui-ai
+          path: dist
+
+      - name: Install plugin, add-on and test bundle
+        run: |
+          D="$RUNNER_TEMP/dbeaver-ui"
+          cp -r "$RUNNER_TEMP/dbeaver" "$D"
+          ./scripts/p2.sh "$D" -repository "jar:file:$(ls "$PWD"/dist/*-site-*.zip)!/" \
+            -installIU dbeaver.openwebui.ai.feature.feature.group,dbeaver.openwebui.ai.async.feature.feature.group
+          T="$RUNNER_TEMP/uitest"; mkdir -p "$T/classes"
+          CP="$(find "$D/plugins" -name '*.jar' | tr '\n' ':')$(ls dist/dbeaver.openwebui.ai_*.jar):$(ls dist/dbeaver.openwebui.ai.async_*.jar)"
+          javac -encoding UTF-8 --release 21 -proc:none -nowarn -cp "$CP" -d "$T/classes" $(find tests/async-uitest/src -name '*.java')
+          cp tests/async-uitest/plugin.xml "$T/classes/"
+          jar cfm "$D/plugins/dbeaver.openwebui.async.uitest_1.0.0.jar" tests/async-uitest/META-INF/MANIFEST.MF -C "$T/classes" .
+          echo "dbeaver.openwebui.async.uitest,1.0.0,plugins/dbeaver.openwebui.async.uitest_1.0.0.jar,4,false" \
+            >> "$D/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"
+          grep openwebui "$D/configuration/org.eclipse.equinox.simpleconfigurator/bundles.info"
+
+      - name: Run DBeaver twice
+        run: DBEAVER_HOME="$RUNNER_TEMP/dbeaver-ui" OUT="$RUNNER_TEMP/ui-async" ./scripts/ui-async-test.sh
+
+      - name: Logs
+        if: always()
+        run: |
+          ls -la "$RUNNER_TEMP/ui-async" "$RUNNER_TEMP/ui-async/ws/.metadata" || true
+          grep -iE 'openwebui|uitest|exception|error' "$RUNNER_TEMP/ui-async/ws/.metadata/dbeaver-debug.log" | tail -80 || true
+          grep -iE 'uitest|exception|error' "$RUNNER_TEMP/ui-async/phase1.log" | tail -40 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-async-logs
+          path: |
+            ${{ runner.temp }}/ui-async/*.png
+            ${{ runner.temp }}/ui-async/*.log
+            ${{ runner.temp }}/ui-async/*.json
+            ${{ runner.temp }}/ui-async/ws/.metadata/dbeaver-debug.log
+
+  # Фоновые запросы против настоящего Open WebUI в Docker; в роли модели — tests/mock_owui.py
+  openwebui-live:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - image: ghcr.io/open-webui/open-webui:main
+            required: true
+          - image: ghcr.io/open-webui/open-webui:v0.10.2
+            required: false
+          - image: ghcr.io/open-webui/open-webui:v0.9.6
+            required: false
+          - image: ghcr.io/open-webui/open-webui:v0.8.12
+            required: false
+          - image: ghcr.io/open-webui/open-webui:v0.7.2
+            required: false
+          - image: ghcr.io/open-webui/open-webui:v0.6.43
+            required: false
+    continue-on-error: ${{ !matrix.required }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Start model mock and Open WebUI
+        run: |
+          MOCK_PORT=18081 python3 tests/mock_owui.py > mock.log 2>&1 &
+          docker run -d --name owui --network host \
+            -e PORT=8080 -e OPENAI_API_BASE_URL=http://127.0.0.1:18081/v1 -e OPENAI_API_KEY=sk-test \
+            -e ENABLE_OLLAMA_API=false -e WEBUI_SECRET_KEY=ci-secret -e ENABLE_SIGNUP=true \
+            -e OFFLINE_MODE=true -e RAG_EMBEDDING_MODEL_AUTO_UPDATE=false -e ENABLE_VERSION_UPDATE_CHECK=false \
+            "${{ matrix.image }}"
+          for i in $(seq 1 120); do
+            curl -sf http://127.0.0.1:8080/health >/dev/null && break
+            sleep 5
+          done
+          curl -sf http://127.0.0.1:8080/health || { docker logs owui | tail -100; exit 1; }
+          docker exec owui sh -c 'cat /app/package.json 2>/dev/null | grep "\"version\"" || true'
+
+      - name: Live test
+        run: |
+          TOKEN=$(curl -sf -X POST http://127.0.0.1:8080/api/v1/auths/signup -H 'Content-Type: application/json' \
+            -d '{"name":"ci","email":"ci@example.com","password":"ci-password-1"}' | python3 -c 'import json,sys; print(json.load(sys.stdin)["token"])')
+          curl -sf http://127.0.0.1:8080/api/models -H "Authorization: Bearer $TOKEN" | python3 -c 'import json,sys; print([m["id"] for m in json.load(sys.stdin)["data"]])'
+          GSON=$(find ~/.m2 /usr/share -name 'gson-*.jar' 2>/dev/null | head -1)
+          if [ -z "$GSON" ]; then
+            curl -sfL -o gson.jar https://repo1.maven.org/maven2/com/google/code/gson/gson/2.11.0/gson-2.11.0.jar && GSON=$PWD/gson.jar
+          fi
+          mkdir -p out
+          javac -encoding UTF-8 --release 21 -proc:none -nowarn -cp "$GSON" -d out \
+            $(find tests/api-stubs bundles/dbeaver.openwebui.ai.async/src/dbeaver/openwebui/async/core tests/src-async -name '*.java')
+          java -cp "out:$GSON" dbeaver.openwebui.async.core.AsyncLiveTest http://127.0.0.1:8080/api/ "$TOKEN" gpt-4o
+
+      - name: Open WebUI log
+        if: failure()
+        run: docker logs owui 2>&1 | grep -v -E '"GET /api/(v1/chats|tasks)|Task IDs for chat' | tail -200
+
   release:
-    needs: [build, upgrade, windows]
+    needs: [build, upgrade, windows, openwebui-live, ui-async]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
     steps:
