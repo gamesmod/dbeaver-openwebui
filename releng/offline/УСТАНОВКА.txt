@@ -18,7 +18,9 @@ Open WebUI (OpenAI-compatible) для AI-ассистента DBeaver CE — у�
 3. ВАЖНО: внизу окна снимите галочку «Связаться со всеми сайтами обновлений во время установки
    для поиска требуемого ПО» (Contact all update sites during install to find required software).
    Без интернета с этой галочкой установка зависает или падает с ошибкой сети.
-4. Отметьте категорию «Open WebUI» целиком → Далее → Далее → примите лицензию → Готово.
+4. Отметьте категорию «Open WebUI integration» целиком. Для фоновых запросов и сохранения AI-чатов
+   (только DBeaver 26.2+) отметьте ещё «Open WebUI: add-ons → Open WebUI: background chats».
+   Далее → Далее → примите лицензию → Готово.
 5. На вопрос о неподписанном ПО ответьте «Установить всё равно» и перезапустите DBeaver.
 Старые версии плагина (1.x, 2.x) заменяются автоматически.
 
@@ -31,6 +33,10 @@ Open WebUI (OpenAI-compatible) для AI-ассистента DBeaver CE — у�
    администратора) укажите папку, где лежит dbeaver.exe:
 
      C:\openwebui-offline\install.cmd "W:\app\dbeaver"
+
+   С надстройкой «Фоновые чаты» (DBeaver 26.2+) — с ключом async:
+
+     C:\openwebui-offline\install.cmd "W:\app\dbeaver" async
 
    В конце должно быть: [OK] Plugin installed.
 

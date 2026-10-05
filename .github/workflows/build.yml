@@ -195,8 +195,9 @@ jobs:
           OPENWEBUI_NOPAUSE: '1'
           ComSpec: C:\Windows\System32\curl.exe
         run: |
-          call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%"
+          call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%" async
           if errorlevel 1 exit /b 1
+          rem второй запуск без ключа: надстройка должна сохраниться
           call "%GITHUB_WORKSPACE%\%PKG:/=\%\install.cmd" "%DBV%"
           if errorlevel 1 exit /b 1
 
@@ -209,6 +210,7 @@ jobs:
           J=$(grep "^dbeaver.openwebui.ai,$FULL," "$BI" | cut -d, -f3); [ -f "$DBV/$J" ] || { echo "::error::нет файла $J"; exit 1; }
           [ "$(wc -l < "$BI")" -gt 300 ] || { echo "::error::bundles.info обеднел"; exit 1; }
           if grep -i openwebui "$BI" | grep -v ",$FULL," ; then echo "::error::остались старые версии"; exit 1; fi
+          grep -q "^dbeaver.openwebui.ai.async,$FULL," "$BI" || { echo "::error::надстройка не установлена или удалена при повторном запуске"; exit 1; }
 
       - uses: actions/upload-artifact@v4
         with:
