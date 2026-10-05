@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Open WebUI background chats UI test (CI only)
+Bundle-SymbolicName: dbeaver.openwebui.async.uitest;singleton:=true
+Bundle-Version: 1.0.0
+Bundle-RequiredExecutionEnvironment: JavaSE-21
+Require-Bundle: org.eclipse.core.runtime,
+ org.eclipse.swt,
+ org.eclipse.ui.workbench,
+ org.jkiss.utils,
+ org.jkiss.dbeaver.model,
+ org.jkiss.dbeaver.model.ai,
+ org.jkiss.dbeaver.ui,
+ org.jkiss.dbeaver.ui.ai,
+ dbeaver.openwebui.ai.async
+Import-Package: com.google.gson

@@ -37,8 +37,8 @@ def bg_worker(task_id, chat_id, mid, req):
             upsert_message(chat_id, mid, {"error": {"content": "Model crashed"}, "done": True}); STREAMS.pop(task_id, None)
         return
     answer = "<think>planning</think>\n\nAnswer %d for: %s" % (len(msgs), last_user)
-    if model == "bg-slow":
-        parts = [answer[i:i+4] for i in range(0, len(answer), 4)]; delay = 0.4
+    if model == "bg-slow" or "slowly" in last_user:
+        parts = [answer[i:i+4] for i in range(0, len(answer), 4)]; delay = 0.5
     else:
         parts = [answer[i:i+8] for i in range(0, len(answer), 8)]; delay = 0.1
     content = ""
@@ -68,7 +68,11 @@ class H(BaseHTTPRequestHandler):
         if self.headers.get("Authorization") != "Bearer " + TOKEN:
             self._json(401, {"detail": "Not authenticated"}); return False
         return True
+    def _alias(self):
+        # Open WebUI talks to its upstream as to OpenAI: /v1/models, /v1/chat/completions
+        if self.path.startswith("/v1/"): self.path = "/api/" + self.path[4:]
     def do_GET(self):
+        self._alias()
         if self.path == "/api/models":
             if not self._auth(): return
             if DEMO:
@@ -107,6 +111,7 @@ class H(BaseHTTPRequestHandler):
             b = b"<!doctype html><html><body>Open WebUI</body></html>"
             self.send_response(200); self.send_header("Content-Type","text/html"); self.send_header("Content-Length",str(len(b))); self.end_headers(); self.wfile.write(b)
     def do_POST(self):
+        self._alias()
         n = int(self.headers.get("Content-Length", 0)); req = json.loads(self.rfile.read(n))
         LAST["req"] = req
         if self.path == "/api/v1/chats/new":
