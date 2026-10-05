@@ -90,6 +90,15 @@ public class AsyncHarnessTest {
         check("history parent chain", "a1".equals(msgs.getAsJsonObject("u2").get("parentId").getAsString())
             && "u2".equals(msgs.getAsJsonObject("a2").get("parentId").getAsString()), msgs);
         check("history currentId", "a2".equals(chat.getAsJsonObject("history").get("currentId").getAsString()), chat);
+        JsonObject stored = new JsonObject(); JsonObject storedChat = ChatHistory.build("T", "m",
+            List.of(new ChatHistory.Turn("u1", "user", "q1", 1), new ChatHistory.Turn("a1", "assistant", "server answer", 2)), null);
+        stored.add("chat", storedChat);
+        JsonObject merged = ChatHistory.build("T", "m", turns, "a2");
+        ChatHistory.mergeStored(merged, stored);
+        JsonObject mm = merged.getAsJsonObject("history").getAsJsonObject("messages");
+        check("merge keeps server answers", mm.has("a1") && "server answer".equals(mm.getAsJsonObject("a1").get("content").getAsString())
+            && mm.getAsJsonObject("a1").getAsJsonArray("childrenIds").toString().contains("u2")
+            && mm.getAsJsonObject("u1").getAsJsonArray("childrenIds").toString().contains("a1"), mm);
         check("stable ids", ChatHistory.messageId("c", 0, "user", "x").equals(ChatHistory.messageId("c", 0, "user", "x"))
             && !ChatHistory.messageId("c", 0, "user", "x").equals(ChatHistory.messageId("c", 1, "user", "x")), null);
 
@@ -114,14 +123,15 @@ public class AsyncHarnessTest {
         JsonObject bg = reqs.get(reqs.size() - 1).getAsJsonObject();
         check("request has chat_id/id/session_id", chatId.equals(bg.get("chat_id").getAsString()) && bg.has("id")
             && bg.get("session_id").getAsString().startsWith("dbeaver-") && bg.get("stream").getAsBoolean(), bg);
-        check("request has user_message", "all users".equals(bg.getAsJsonObject("user_message").get("content").getAsString()), bg);
+        check("request has parent_message", "all users".equals(bg.getAsJsonObject("parent_message").get("content").getAsString())
+            && bg.getAsJsonObject("parent_message").get("id").getAsString().equals(bg.get("parent_id").getAsString()), bg);
         check("background tasks off, title kept", !bg.getAsJsonObject("background_tasks").has("title_generation")
             && !bg.getAsJsonObject("background_tasks").get("tags_generation").getAsBoolean(), bg);
         JsonObject srvChat = state.getAsJsonObject("chats").getAsJsonObject(chatId).getAsJsonObject("chat");
         JsonObject srvMsgs = srvChat.getAsJsonObject("history").getAsJsonObject("messages");
         check("server chat has 2 messages", srvMsgs.size() == 2, srvMsgs.keySet());
         JsonObject srvAnswer = srvMsgs.getAsJsonObject(st.job().assistantId);
-        check("server answer linked to user message", srvAnswer != null && bg.getAsJsonObject("user_message").get("id").getAsString()
+        check("server answer linked to user message", srvAnswer != null && bg.getAsJsonObject("parent_message").get("id").getAsString()
             .equals(srvAnswer.get("parentId").getAsString()), srvAnswer);
         check("chat title", "Users".equals(srvChat.get("title").getAsString()), srvChat.get("title"));
 

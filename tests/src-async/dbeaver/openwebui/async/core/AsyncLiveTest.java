@@ -69,7 +69,7 @@ public class AsyncLiveTest {
         JsonObject chat = api.getChat(store.chatOf(conv));
         System.out.println("chat: " + chat);
         JsonObject answer = ChatHistory.findMessage(chat, st.job().assistantId);
-        check("answer stored in the chat", answer != null && same(expected, ChatHistory.messageText(answer)), answer);
+        check("answer stored in the chat", answer != null && same(expected, ReplyState.stripReasoning(ChatHistory.messageText(answer))), answer);
         check("answer has a parent", answer != null && answer.has("parentId") && !answer.get("parentId").isJsonNull(), answer);
         String title = chat.has("title") ? chat.get("title").getAsString() : null;
         check("chat title kept", "Live test".equals(title), title);

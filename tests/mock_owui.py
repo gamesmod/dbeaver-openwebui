@@ -145,7 +145,7 @@ class H(BaseHTTPRequestHandler):
                 if cid not in CHATS:
                     self._json(400, {"detail": "Chat not found"}); return
                 BG_LOG.append(req)
-                um = req.get("user_message")
+                um = req.get("user_message") or req.get("parent_message")
                 if um: upsert_message(cid, um["id"], um)
                 upsert_message(cid, mid, {"id": mid, "parentId": um["id"] if um else None, "role": "assistant", "content": "", "done": False, "model": req["model"], "childrenIds": []})
                 tid = str(uuid.uuid4())

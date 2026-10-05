@@ -81,7 +81,10 @@ public final class BackgroundTask {
         body.addProperty("id", assistantId);
         // Any session id switches Open WebUI to the background mode; there is no browser to notify
         body.addProperty("session_id", "dbeaver-" + UUID.randomUUID());
-        body.add("user_message", ChatHistory.userMessage(user, parentOfUser, assistantId, req.model()));
+        // "parent_message" is understood by all versions (0.11 reads it as user_message, 0.6–0.10 require it);
+        // "parent_id" is the parent of the answer in 0.6–0.10 and is ignored by 0.11 when chat_id is given
+        body.add("parent_message", ChatHistory.userMessage(user, parentOfUser, assistantId, req.model()));
+        body.addProperty("parent_id", user.id());
         JsonObject tasks = new JsonObject();
         // No "title_generation" key at all: with "false" Open WebUI renames the chat after the first message
         tasks.addProperty("tags_generation", false);
@@ -117,6 +120,8 @@ public final class BackgroundTask {
         String chatId = store.chatOf(conversationId);
         if (chatId != null) {
             try {
+                // Open WebUI before 0.10 replaces the history on update: keep the messages the server owns
+                ChatHistory.mergeStored(chat, api.getChat(chatId));
                 api.updateChat(chatId, chat);
                 return chatId;
             } catch (OwuiException e) {

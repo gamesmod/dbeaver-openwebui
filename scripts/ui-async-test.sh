@@ -26,6 +26,20 @@ run_phase() {
   "$DBEAVER_HOME/dbeaver" -nosplash -data "$WS" -vmargs -Dowui.uitest.phase="$phase" -Dowui.uitest.out="$OUT/result" \
     > "$OUT/phase$phase.log" 2>&1 &
   local pid=$!
+  # Мастер первого запуска (DBeaver 26.2.2+) и прочие стартовые окна закрываются Enter/Escape
+  ( for _ in $(seq 1 40); do
+      for w in $(xdotool search --onlyvisible --name 'Product Configuration' 2>/dev/null); do
+        xdotool windowactivate --sync "$w" key Return 2>/dev/null; echo "закрыт мастер первого запуска"
+      done
+      for w in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do
+        n=$(xdotool getwindowname "$w" 2>/dev/null)
+        case "$n" in ""|DBeaver*|"Product Configuration") ;;
+          *) echo "закрыто окно: $n"; xdotool windowactivate --sync "$w" key Escape 2>/dev/null ;;
+        esac
+      done
+      sleep 3
+    done ) &
+  local closer=$!
   for _ in $(seq 1 120); do
     [ -f "$OUT/phase$phase.json" ] && break
     kill -0 $pid 2>/dev/null || break
@@ -33,6 +47,7 @@ run_phase() {
   done
   sleep 2
   command -v import >/dev/null && import -window root "$OUT/phase$phase.png" 2>/dev/null
+  kill $closer 2>/dev/null
   kill $pid 2>/dev/null; sleep 1; kill -9 $pid 2>/dev/null || true
   grep -E 'OWUI-STEP' "$OUT/phase$phase.log" || true
   grep -E '^(PASS|FAIL) |OWUI-UITEST' "$OUT/phase$phase.log" || true

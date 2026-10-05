@@ -119,6 +119,37 @@ public final class ChatHistory {
         return chat;
     }
 
+    /**
+     * Adds to {@code chat} the stored messages it does not contain (answers written by the server)
+     * and recomputes {@code childrenIds}, as Open WebUI 0.10+ does on its side.
+     */
+    public static void mergeStored(JsonObject chat, JsonObject storedResponse) {
+        JsonObject stored = storedResponse.has("chat") && storedResponse.get("chat").isJsonObject()
+            ? storedResponse.getAsJsonObject("chat") : storedResponse;
+        if (!stored.has("history") || !stored.get("history").isJsonObject()) {
+            return;
+        }
+        JsonObject storedMessages = stored.getAsJsonObject("history").getAsJsonObject("messages");
+        JsonObject messages = chat.getAsJsonObject("history").getAsJsonObject("messages");
+        if (storedMessages == null || messages == null) {
+            return;
+        }
+        for (String id : storedMessages.keySet()) {
+            if (!messages.has(id) && storedMessages.get(id).isJsonObject()) {
+                messages.add(id, storedMessages.getAsJsonObject(id).deepCopy());
+            }
+        }
+        for (String id : messages.keySet()) {
+            messages.getAsJsonObject(id).add("childrenIds", new JsonArray());
+        }
+        for (String id : messages.keySet()) {
+            var parent = messages.getAsJsonObject(id).get("parentId");
+            if (parent != null && parent.isJsonPrimitive() && messages.has(parent.getAsString())) {
+                messages.getAsJsonObject(parent.getAsString()).getAsJsonArray("childrenIds").add(id);
+            }
+        }
+    }
+
     /** The user message object for {@code user_message} of a background completion request. */
     public static JsonObject userMessage(Turn user, String parentId, String assistantId, String model) {
         JsonObject m = message(user.id(), parentId, "user", user.content(), user.timestampSec(), null);
