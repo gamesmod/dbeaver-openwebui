@@ -26,18 +26,24 @@ run_phase() {
   "$DBEAVER_HOME/dbeaver" -nosplash -data "$WS" -vmargs -Dproduct.config.disable=true -Dowui.uitest.phase="$phase" -Dowui.uitest.out="$OUT/result" \
     > "$OUT/phase$phase.log" 2>&1 &
   local pid=$!
-  # Мастер первого запуска (DBeaver 26.2.2+) и прочие стартовые окна закрываются Enter/Escape
-  ( for _ in $(seq 1 40); do
-      for w in $(xdotool search --onlyvisible --name 'Product Configuration' 2>/dev/null); do
+  # Первые ~40 с стартовые окна закрываются Escape; весь запуск — снимки экрана по запросу теста
+  ( for i in $(seq 1 600); do
+      [ "$i" -le 80 ] && for w in $(xdotool search --onlyvisible --name 'Product Configuration' 2>/dev/null); do
         xdotool windowactivate --sync "$w" key Return 2>/dev/null; echo "закрыт мастер первого запуска"
       done
-      for w in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do
+      [ "$i" -le 80 ] && for w in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do
         n=$(xdotool getwindowname "$w" 2>/dev/null)
         case "$n" in ""|DBeaver*|"Product Configuration") ;;
           *) echo "закрыто окно: $n"; xdotool windowactivate --sync "$w" key Escape 2>/dev/null ;;
         esac
       done
-      sleep 3
+      for r in "$OUT"/shot-*.req; do
+        [ -f "$r" ] || continue
+        n=$(basename "$r" .req); n=${n#shot-}
+        import -window root "$OUT/$n.png" 2>/dev/null; echo "снимок $n"
+        rm -f "$r"; touch "$OUT/shot-$n.done"
+      done
+      sleep 0.5
     done ) &
   local closer=$!
   for _ in $(seq 1 120); do

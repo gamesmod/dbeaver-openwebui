@@ -55,6 +55,22 @@ public class UiTest implements IWorkbenchWindowInitializer {
         t.start();
     }
 
+    /** Asks scripts/ui-async-test.sh for a screenshot and waits for it (for the documentation). */
+    private static void shot(String name) {
+        try {
+            Path dir = Path.of(System.getProperty("owui.uitest.out")).getParent();
+            Path req = dir.resolve("shot-" + name + ".req");
+            Path done = dir.resolve("shot-" + name + ".done");
+            Thread.sleep(1500);
+            Files.writeString(req, name);
+            for (int i = 0; i < 40 && !Files.exists(done); i++) {
+                Thread.sleep(250);
+            }
+        } catch (Exception e) {
+            step("shot failed: " + e);
+        }
+    }
+
     private static void step(String text) {
         System.out.println("OWUI-STEP " + text);
         System.out.flush();
@@ -111,12 +127,25 @@ public class UiTest implements IWorkbenchWindowInitializer {
         ui(() -> chat.submitPrompt("count orders"));
         boolean placeholder = waitFor(15, () -> lastAssistantStartsWith(c2, "⏳") && !ui(chat::isBusy));
         check("detached: placeholder and free chat", placeholder, dump(c2));
+        shot("async-placeholder");
         int placeholderIndex = c2.getMessages().size() - 1;
         boolean replaced = waitFor(60, () -> {
             List<AIChatMessage> m = c2.getMessages();
             return m.size() > placeholderIndex && "Answer 2 for: count orders".equals(m.get(placeholderIndex).message().getContent());
         });
         check("detached: placeholder replaced by the answer", replaced, dump(c2));
+        shot("async-answer");
+        // the settings page
+        AtomicReference<org.eclipse.jface.preference.PreferenceDialog> dlg = new AtomicReference<>();
+        ui(() -> {
+            var d = org.eclipse.ui.dialogs.PreferencesUtil.createPreferenceDialogOn(
+                org.jkiss.dbeaver.ui.UIUtils.getActiveWorkbenchShell(), "dbeaver.openwebui.preferences.async", null, null);
+            d.setBlockOnOpen(false);
+            d.open();
+            dlg.set(d);
+        });
+        shot("async-settings");
+        ui(() -> dlg.get().close());
         results.put("c2", c2.getId().toString());
 
         // 3. chats on disk and in Open WebUI
