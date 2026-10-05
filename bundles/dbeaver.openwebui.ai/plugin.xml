@@ -12,7 +12,8 @@
             properties="dbeaver.openwebui.model.OpenWebUIProperties"
             promoted="true"
             supportsFunctions="true"
-            providesMetadata="false"/>
+            providesMetadata="false"
+            fallbacks="openwebui-async"/>
     </extension>
 
     <!-- Settings panel for the engine (lookup is by exact engine class name) -->

@@ -22,9 +22,9 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-final class JsonSupport {
+public final class JsonSupport {
 
-    static final Gson GSON = new GsonBuilder()
+    public static final Gson GSON = new GsonBuilder()
         .setStrictness(Strictness.LENIENT)
         .disableHtmlEscaping()
         .create();

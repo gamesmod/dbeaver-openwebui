@@ -157,7 +157,7 @@ public class OpenWebUIClient extends AbstractHttpAIClient {
      * any explicit path ("/api", "/v1", "/ollama/v1") is kept as is.
      */
     @NotNull
-    static String normalizeBaseUrl(@Nullable String url) {
+    public static String normalizeBaseUrl(@Nullable String url) {
         String value = url == null || url.isBlank() ? OpenWebUIConstants.DEFAULT_BASE_URL : url.strip();
         if (!value.contains("://")) {
             value = "http://" + value;

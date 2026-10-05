@@ -6,7 +6,13 @@
    <feature id="io.dbtools.openwebui.feature" version="0.0.0">
       <category name="openwebui"/>
    </feature>
+   <feature id="dbeaver.openwebui.ai.async.feature" version="0.0.0">
+      <category name="openwebui-addons"/>
+   </feature>
    <category-def name="openwebui" label="Open WebUI integration">
       <description>Движок Open WebUI для AI-ассистента DBeaver. Отметьте категорию целиком: так установленная версия 1.x или 2.0.x обновится.</description>
+   </category-def>
+   <category-def name="openwebui-addons" label="Open WebUI: add-ons (optional, DBeaver 26.2+)">
+      <description>Необязательные надстройки. «Background chats»: фоновые запросы на сервере Open WebUI, сохранение AI-чатов между перезапусками и в Open WebUI.</description>
    </category-def>
 </site>

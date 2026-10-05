@@ -11,6 +11,7 @@
 #   dbeaver-openwebui-ai-site-<версия>.zip   — архив update site (Help → Install New Software → Add → Archive)
 #   dbeaver.openwebui.ai_<версия>.jar         — бандл для DBeaver 26.2+
 #   dbeaver.openwebui.ai.compat25_<версия>.jar — бандл для DBeaver 25.2.4–25.2.5
+#   dbeaver.openwebui.ai.async_<версия>.jar   — надстройка «фоновые чаты» (DBeaver 26.2+)
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -41,11 +42,11 @@ classpath() {  # classpath <DBeaver home>
   echo "$cp"
 }
 
-build_bundle() {  # build_bundle <имя бандла> <DBeaver home>
-  local name="$1" home="$2" dir="$ROOT/bundles/$1" out="$WORK/$1"
+build_bundle() {  # build_bundle <имя бандла> <DBeaver home> [доп. classpath]
+  local name="$1" home="$2" dir="$ROOT/bundles/$1" out="$WORK/$1" extra="${3:-}"
   echo "==> $name: компиляция против $home"
   mkdir -p "$out/classes"
-  "$JAVAC" -encoding UTF-8 --release 21 -proc:none -nowarn -cp "$(classpath "$home")" -d "$out/classes" \
+  "$JAVAC" -encoding UTF-8 --release 21 -proc:none -nowarn -cp "$extra$(classpath "$home")" -d "$out/classes" \
     $(find "$dir/src" -name '*.java')
   (cd "$dir/src" && find . -name '*.properties' | while read -r f; do
     mkdir -p "$out/classes/$(dirname "$f")"; cp "$f" "$out/classes/$f"; done)
@@ -68,6 +69,9 @@ build_feature() {  # build_feature <id фичи>
 
 build_bundle dbeaver.openwebui.ai "$DBEAVER_HOME"
 build_feature dbeaver.openwebui.ai.dbeaver26.feature
+# Надстройка «фоновые чаты» (DBeaver 26.2+): компилируется против основного бандла
+build_bundle dbeaver.openwebui.ai.async "$DBEAVER_HOME" "$WORK/dbeaver.openwebui.ai/classes:"
+build_feature dbeaver.openwebui.ai.async.feature
 if [ -n "${DBEAVER25_HOME:-}" ]; then
   build_bundle dbeaver.openwebui.ai.compat25 "$DBEAVER25_HOME"
   build_feature dbeaver.openwebui.ai.dbeaver25.feature

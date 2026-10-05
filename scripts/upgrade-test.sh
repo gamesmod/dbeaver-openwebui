@@ -2,6 +2,8 @@
 # Проверка обновления через тот же InstallOperation, что и мастер Help → Install New Software:
 # в копию DBeaver ставится старая версия, затем выбираются все фичи категории нового сайта.
 #   ./scripts/upgrade-test.sh <DBeaver home> <старый site.zip> <корневая IU старой версии> <новый site.zip> <ожидаемый бандл>
+# INSTALL_IUS — какие фичи ставить (по умолчанию категория Open WebUI integration),
+# EXPECT_ALSO — бандлы, которые тоже должны встать (через пробел).
 set -euo pipefail
 # Вывод дублируется в файл: при ошибке хвост попадает в аннотацию GitHub Actions
 LOG="$(mktemp)"
@@ -31,7 +33,7 @@ jar cfm "$H/plugins/dbeaver.openwebui.p2test_1.0.0.jar" "$ROOT/tests/p2test/META
 echo "dbeaver.openwebui.p2test,1.0.0,plugins/dbeaver.openwebui.p2test_1.0.0.jar,4,false" >> "$BI"
 
 echo "==> Установка новой версии: все фичи категории (как при отметке категории в мастере)"
-IUS="dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group"
+IUS="${INSTALL_IUS:-dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group}"
 set +e
 "$( [ -x "$H/jre/bin/java" ] && echo "$H/jre/bin/java" || command -v java )" -jar "$(ls "$H"/plugins/org.eclipse.equinox.launcher_*.jar | head -1)" -nosplash -consoleLog \
   -application dbeaver.openwebui.p2test.app "jar:file:$NEW_SITE!/" "$IUS" 2>&1 | tee "$T/out.txt" | grep -v -E '^\s*$|SLF4J'
@@ -43,6 +45,9 @@ echo "==> bundles.info после обновления"
 grep -E 'openwebui' "$BI" | grep -v p2test | sed 's/^/  /'
 NEW_LINES=$(grep -c "^$EXPECT_BUNDLE," "$BI" || true)
 [ "$NEW_LINES" = "1" ] || { echo "Ожидалась ровно одна версия $EXPECT_BUNDLE, найдено: $NEW_LINES" >&2; exit 1; }
+for extra in ${EXPECT_ALSO:-}; do
+  grep -q "^$extra," "$BI" || { echo "Не установлен $extra" >&2; exit 1; }
+done
 if grep -q '^io.dbtools.openwebui,' "$BI"; then echo "Старый плагин io.dbtools.openwebui не удалён" >&2; exit 1; fi
 OTHER=dbeaver.openwebui.ai.compat25
 [ "$EXPECT_BUNDLE" = "$OTHER" ] && OTHER=dbeaver.openwebui.ai

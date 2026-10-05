@@ -152,7 +152,7 @@ public class OpenWebUIEngine extends BaseCompletionEngine<OpenWebUIProperties> {
     // ------------------------------------------------------------------ internals
 
     @NotNull
-    private synchronized OpenWebUIClient getClient() {
+    protected synchronized OpenWebUIClient getClient() {
         if (client == null) {
             client = new OpenWebUIClient(properties);
         }
@@ -160,7 +160,7 @@ public class OpenWebUIEngine extends BaseCompletionEngine<OpenWebUIProperties> {
     }
 
     @NotNull
-    private ChatDto.ChatRequest createChatRequest(@NotNull AIEngineRequest request) throws DBException {
+    protected ChatDto.ChatRequest createChatRequest(@NotNull AIEngineRequest request) throws DBException {
         String model = properties.getModel();
         if (model == null || model.isBlank()) {
             throw new DBException("Open WebUI model is not selected. Open AI settings and choose a model.");

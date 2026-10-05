@@ -73,6 +73,12 @@ jobs:
       - name: Install check — DBeaver ${{ steps.dbv.outputs.version }}
         run: ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver" none - "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai
 
+      - name: Install check — background chats add-on, DBeaver ${{ steps.dbv.outputs.version }}
+        env:
+          INSTALL_IUS: dbeaver.openwebui.ai.feature.feature.group,io.dbtools.openwebui.feature.feature.group,dbeaver.openwebui.ai.async.feature.feature.group
+          EXPECT_ALSO: dbeaver.openwebui.ai.async
+        run: ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver" none - "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai
+
       - name: Install check — DBeaver ${{ env.DBEAVER25_VERSION }}
         run: ./scripts/upgrade-test.sh "$RUNNER_TEMP/dbeaver25" none - "$(ls "$PWD"/dist/*-site-*.zip)" dbeaver.openwebui.ai.compat25
 
