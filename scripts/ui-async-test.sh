@@ -31,7 +31,7 @@ run_phase() {
       [ "$i" -le 80 ] && for w in $(xdotool search --onlyvisible --name 'Product Configuration' 2>/dev/null); do
         xdotool windowactivate --sync "$w" key Return 2>/dev/null; echo "закрыт мастер первого запуска"
       done
-      [ "$i" -le 80 ] && for w in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do
+      [ "$i" -le 24 ] && for w in $(xdotool search --onlyvisible --name '.' 2>/dev/null); do
         n=$(xdotool getwindowname "$w" 2>/dev/null)
         case "$n" in ""|DBeaver*|"Product Configuration") ;;
           *) echo "закрыто окно: $n"; xdotool windowactivate --sync "$w" key Escape 2>/dev/null ;;
