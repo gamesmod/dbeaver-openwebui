@@ -43,6 +43,11 @@ public class AsyncLiveTest {
         return c;
     }
 
+    /** Open WebUI may eat a space next to a reasoning block: compare without spaces. */
+    static boolean same(String expected, String actual) {
+        return actual != null && expected.replace(" ", "").equals(actual.replace(" ", ""));
+    }
+
     public static void main(String[] a) throws Exception {
         String base = a[0], token = a[1], model = a[2];
         String expected = a.length > 3 ? a[3] : "SELECT * FROM users;";
@@ -60,11 +65,11 @@ public class AsyncLiveTest {
         }
         Sink sink = new Sink();
         boolean fin = BackgroundTask.poll(api, store, st.job(), sink, 500, 30_000);
-        check("answer received", fin && expected.equals(sink.done), "done=" + sink.done + " error=" + sink.error + " text=" + sink.text);
+        check("answer received", fin && same(expected, sink.done), "done=" + sink.done + " error=" + sink.error + " text=" + sink.text);
         JsonObject chat = api.getChat(store.chatOf(conv));
         System.out.println("chat: " + chat);
         JsonObject answer = ChatHistory.findMessage(chat, st.job().assistantId);
-        check("answer stored in the chat", answer != null && ChatHistory.messageText(answer).contains(expected), answer);
+        check("answer stored in the chat", answer != null && same(expected, ChatHistory.messageText(answer)), answer);
         check("answer has a parent", answer != null && answer.has("parentId") && !answer.get("parentId").isJsonNull(), answer);
         String title = chat.has("title") ? chat.get("title").getAsString() : null;
         check("chat title kept", "Live test".equals(title), title);
@@ -75,7 +80,7 @@ public class AsyncLiveTest {
                 new TurnMapper.Item(true, "only active", ts + 2)), completion("all users", "only active"), true, JobStore.MODE_WAIT));
         Sink sink2 = new Sink();
         BackgroundTask.poll(api, store, st2.job(), sink2, 500, 30_000);
-        check("follow-up answered", expected.equals(sink2.done), sink2.done + " / " + sink2.error);
+        check("follow-up answered", same(expected, sink2.done), sink2.done + " / " + sink2.error);
         JsonObject chat2 = api.getChat(store.chatOf(conv));
         JsonObject msgs = chat2.getAsJsonObject("chat").getAsJsonObject("history").getAsJsonObject("messages");
         check("chat has 4 messages", msgs.size() == 4, msgs.keySet());
@@ -90,7 +95,7 @@ public class AsyncLiveTest {
             done = BackgroundTask.check(api, store, store.find(st3.job().id).orElseThrow());
         }
         JobStore.Job j = store.find(st3.job().id).orElseThrow();
-        check("detached answer", done && expected.equals(j.result), j.result + " / " + j.error);
+        check("detached answer", done && same(expected, j.result), j.result + " / " + j.error);
 
         // mirror only
         String conv4 = UUID.randomUUID().toString();

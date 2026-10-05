@@ -231,7 +231,7 @@ jobs:
       - name: Install X tools and GTK/WebKit
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y -qq xvfb xdotool openbox libgtk-3-0t64 libwebkit2gtk-4.1-0 fonts-dejavu >/dev/null
+          sudo apt-get install -y -qq xvfb xdotool openbox imagemagick libgtk-3-0t64 libwebkit2gtk-4.1-0 fonts-dejavu >/dev/null
 
       - uses: actions/cache@v4
         with:
@@ -271,8 +271,19 @@ jobs:
       - name: Logs
         if: always()
         run: |
-          grep -iE 'openwebui|exception' "$RUNNER_TEMP/ui-async/dbeaver-debug.log" | tail -80 || true
-          tail -40 "$RUNNER_TEMP/ui-async/phase1.log" || true
+          ls -la "$RUNNER_TEMP/ui-async" "$RUNNER_TEMP/ui-async/ws/.metadata" || true
+          grep -iE 'openwebui|uitest|exception|error' "$RUNNER_TEMP/ui-async/ws/.metadata/dbeaver-debug.log" | tail -80 || true
+          grep -iE 'uitest|exception|error' "$RUNNER_TEMP/ui-async/phase1.log" | tail -40 || true
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ui-async-logs
+          path: |
+            ${{ runner.temp }}/ui-async/*.png
+            ${{ runner.temp }}/ui-async/*.log
+            ${{ runner.temp }}/ui-async/*.json
+            ${{ runner.temp }}/ui-async/ws/.metadata/dbeaver-debug.log
 
   # Фоновые запросы против настоящего Open WebUI в Docker; в роли модели — tests/mock_owui.py
   openwebui-live:
@@ -283,7 +294,15 @@ jobs:
         include:
           - image: ghcr.io/open-webui/open-webui:main
             required: true
-          - image: ghcr.io/open-webui/open-webui:v0.6.5
+          - image: ghcr.io/open-webui/open-webui:v0.10.2
+            required: false
+          - image: ghcr.io/open-webui/open-webui:v0.9.6
+            required: false
+          - image: ghcr.io/open-webui/open-webui:v0.8.12
+            required: false
+          - image: ghcr.io/open-webui/open-webui:v0.7.2
+            required: false
+          - image: ghcr.io/open-webui/open-webui:v0.6.43
             required: false
     continue-on-error: ${{ !matrix.required }}
     steps:
@@ -325,7 +344,7 @@ jobs:
 
       - name: Open WebUI log
         if: failure()
-        run: docker logs owui 2>&1 | tail -150
+        run: docker logs owui 2>&1 | grep -v -E '"GET /api/(v1/chats|tasks)|Task IDs for chat' | tail -200
 
   release:
     needs: [build, upgrade, windows, openwebui-live, ui-async]

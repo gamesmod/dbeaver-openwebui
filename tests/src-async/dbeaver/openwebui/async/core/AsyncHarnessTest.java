@@ -115,7 +115,8 @@ public class AsyncHarnessTest {
         check("request has chat_id/id/session_id", chatId.equals(bg.get("chat_id").getAsString()) && bg.has("id")
             && bg.get("session_id").getAsString().startsWith("dbeaver-") && bg.get("stream").getAsBoolean(), bg);
         check("request has user_message", "all users".equals(bg.getAsJsonObject("user_message").get("content").getAsString()), bg);
-        check("background tasks off", !bg.getAsJsonObject("background_tasks").get("title_generation").getAsBoolean(), bg);
+        check("background tasks off, title kept", !bg.getAsJsonObject("background_tasks").has("title_generation")
+            && !bg.getAsJsonObject("background_tasks").get("tags_generation").getAsBoolean(), bg);
         JsonObject srvChat = state.getAsJsonObject("chats").getAsJsonObject(chatId).getAsJsonObject("chat");
         JsonObject srvMsgs = srvChat.getAsJsonObject("history").getAsJsonObject("messages");
         check("server chat has 2 messages", srvMsgs.size() == 2, srvMsgs.keySet());

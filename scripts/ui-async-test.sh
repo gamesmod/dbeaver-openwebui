@@ -32,7 +32,9 @@ run_phase() {
     sleep 2
   done
   sleep 2
+  command -v import >/dev/null && import -window root "$OUT/phase$phase.png" 2>/dev/null
   kill $pid 2>/dev/null; sleep 1; kill -9 $pid 2>/dev/null || true
+  grep -E 'OWUI-STEP' "$OUT/phase$phase.log" || true
   grep -E '^(PASS|FAIL) |OWUI-UITEST' "$OUT/phase$phase.log" || true
   cat "$OUT/phase$phase.json" 2>/dev/null || echo "Нет результата фазы $phase"
 }

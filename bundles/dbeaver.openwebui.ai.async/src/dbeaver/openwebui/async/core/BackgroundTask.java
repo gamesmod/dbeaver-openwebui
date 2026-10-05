@@ -83,7 +83,7 @@ public final class BackgroundTask {
         body.addProperty("session_id", "dbeaver-" + UUID.randomUUID());
         body.add("user_message", ChatHistory.userMessage(user, parentOfUser, assistantId, req.model()));
         JsonObject tasks = new JsonObject();
-        tasks.addProperty("title_generation", false);
+        // No "title_generation" key at all: with "false" Open WebUI renames the chat after the first message
         tasks.addProperty("tags_generation", false);
         tasks.addProperty("follow_up_generation", false);
         body.add("background_tasks", tasks);

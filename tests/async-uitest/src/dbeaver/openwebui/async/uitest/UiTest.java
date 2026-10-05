@@ -55,10 +55,17 @@ public class UiTest implements IWorkbenchWindowInitializer {
         t.start();
     }
 
+    private static void step(String text) {
+        System.out.println("OWUI-STEP " + text);
+        System.out.flush();
+    }
+
     private void run(String phase) {
         Path out = Path.of(System.getProperty("owui.uitest.out"));
+        step("started, phase " + phase);
         try {
             Thread.sleep(15_000);
+            step("after delay");
             if ("1".equals(phase)) {
                 phase1(out);
             } else {
@@ -86,10 +93,13 @@ public class UiTest implements IWorkbenchWindowInitializer {
                 throw new RuntimeException(e);
             }
         });
+        step("chat view open: " + chat);
         // 1. waiting mode
         AsyncPlugin.saveSettings(new AsyncSettings(true, true, true, false, 1));
         AIChatConversation c1 = ui(chat::getActiveConversation);
+        step("submit 1, conversation " + c1.getId());
         ui(() -> chat.submitPrompt("all users"));
+        step("submitted 1");
         boolean answered = waitFor(60, () -> hasAssistant(c1, "Answer 2 for: all users") && !ui(chat::isBusy));
         check("wait mode: answer in chat", answered, dump(c1));
         results.put("c1", c1.getId().toString());
@@ -181,6 +191,7 @@ public class UiTest implements IWorkbenchWindowInitializer {
     }
 
     private void check(String name, boolean passed, Object info) {
+        step("check " + name);
         results.put(name, passed ? "PASS" : "FAIL: " + info);
         ok &= passed;
         System.out.println((passed ? "PASS " : "FAIL ") + name + (passed ? "" : " -> " + info));
